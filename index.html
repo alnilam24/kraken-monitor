@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Kraken">
+<meta name="theme-color" content="#0a0c10">
+<meta name="robots" content="noindex">
+<title>Kraken Monitor</title>
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-180.png">
+<style>
+:root{
+  --bg:#0a0c10;--surface:#12161d;--surface-hi:#1b2029;--border:#242a35;--fg:#eef0f4;--muted:#8b93a2;--faint:#5b6371;
+  --red:#FC0D03;--red-soft:#FF6B63;--red-tint:#2a0f10;--ok:#3ddc84;--warn:#f5a524;--blue:#3b82f6;--yellow:#facc15;
+  --gap:12px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--fg)}
+body{font:15px/1.45 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif;
+  padding:calc(env(safe-area-inset-top) + 14px) max(16px,env(safe-area-inset-right)) calc(env(safe-area-inset-bottom) + 28px) max(16px,env(safe-area-inset-left));
+  -webkit-font-smoothing:antialiased;-webkit-text-size-adjust:100%}
+.wrap{max-width:720px;margin:0 auto}
+header{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+header img{width:46px;height:46px;border-radius:12px;background:var(--red-tint)}
+header .names{flex:1;min-width:0}
+header h1{font-size:20px;font-weight:700;letter-spacing:-.01em}
+header .sub{font-size:12px;color:var(--muted)}
+.pill{font-size:11px;font-weight:700;letter-spacing:.06em;padding:5px 10px;border-radius:999px;display:inline-flex;align-items:center;gap:6px;
+  background:var(--surface-hi);color:var(--muted);white-space:nowrap}
+.pill i{width:7px;height:7px;border-radius:50%;background:currentColor;display:block}
+.pill.live{color:var(--ok);background:#0f2a1b}.pill.live i{animation:pulse 1.6s infinite}
+.pill.est{color:var(--warn);background:#2b2110}
+.pill.off{color:var(--red-soft);background:var(--red-tint)}
+@keyframes pulse{50%{opacity:.25}}
+.card{min-width:0;background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:16px;margin-bottom:var(--gap)}
+.label{font-size:11px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+.status{display:flex;gap:16px;align-items:center}
+.ring{flex:none;width:104px;height:104px;position:relative}
+.ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.ring .pct{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.ring .pct b{font-size:24px;font-weight:700;font-variant-numeric:tabular-nums}
+.ring .pct span{font-size:10px;color:var(--muted)}
+.status .text{min-width:0;flex:1}
+.stage{font-size:19px;font-weight:700}
+.steps{font-size:14px;color:var(--fg);font-variant-numeric:tabular-nums;margin-top:2px}
+.note{font-size:12.5px;color:var(--muted);margin-top:6px;overflow-wrap:anywhere}
+.strip{display:flex;gap:4px;margin:16px 0 6px}
+.strip div{flex:1;height:8px;border-radius:4px;background:var(--surface-hi);overflow:hidden;position:relative}
+.strip div span{position:absolute;inset:0 auto 0 0;display:block}
+.strip div.skip{background:repeating-linear-gradient(45deg,#1b2029 0 4px,#14181f 4px 8px)}
+.strip-names{display:flex;gap:4px;font-size:9.5px;color:var(--faint);text-align:center}
+.strip-names div{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.strip-names .now{color:var(--fg);font-weight:600}
+.facts{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px 14px;margin-top:14px;font-size:13px}
+.facts div{display:flex;flex-direction:column}
+.facts small{color:var(--muted);font-size:11px}
+.facts b{font-weight:600;font-variant-numeric:tabular-nums}
+.tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--gap);margin-bottom:var(--gap)}
+.tile{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:13px 14px}
+.tile small{display:block;font-size:11px;color:var(--muted);font-weight:600;letter-spacing:.04em;text-transform:uppercase}
+.tile b{display:block;font-size:24px;font-weight:700;margin-top:3px;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.tile em{display:block;overflow-wrap:anywhere;font-style:normal;font-size:12px;color:var(--muted);margin-top:1px;font-variant-numeric:tabular-nums}
+.good{color:var(--ok)!important}.bad{color:var(--red-soft)!important}
+.mix{display:flex;height:22px;border-radius:7px;overflow:hidden;margin:4px 0 8px}
+.mix div{display:flex;align-items:center;justify-content:center;font-size:10.5px;font-weight:700;color:#0a0c10;min-width:0;overflow:hidden}
+.areas{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 14px;font-size:13px}
+.areas div{display:flex;justify-content:space-between;gap:8px}
+.areas span{display:flex;align-items:center;gap:7px;color:var(--muted)}
+.areas span i{width:9px;height:9px;border-radius:3px;display:block}
+.areas b{font-weight:600;font-variant-numeric:tabular-nums}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12px;color:var(--muted);margin-top:8px}
+.legend span{display:flex;align-items:center;gap:6px}
+.legend i{width:14px;height:3px;border-radius:2px;display:block}
+.legend i.bar{height:9px;width:9px;border-radius:2px;opacity:.55}
+#chart{width:100%;height:auto;display:block;margin-top:2px}
+.foot{font-size:11.5px;color:var(--faint);text-align:center;margin-top:16px}
+.empty{color:var(--muted);font-size:14px;padding:30px 0;text-align:center}
+@media (max-width:360px){.ring{width:88px;height:88px}.tile b{font-size:21px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <img src="icon-180.png" alt="">
+    <div class="names"><h1>Kraken</h1><div class="sub" id="model">FMC AI · training monitor</div></div>
+    <div class="pill" id="pill"><i></i><span>…</span></div>
+  </header>
+
+  <div id="setup" class="card empty" hidden>Open the full link with the gist ID after the <b>#</b>.</div>
+
+  <main id="main" hidden>
+    <section class="card">
+      <div class="label">Status</div>
+      <div class="status">
+        <div class="ring">
+          <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="43" fill="none" stroke="#1b2029" stroke-width="9"/>
+            <circle id="ringbar" cx="50" cy="50" r="43" fill="none" stroke="#FC0D03" stroke-width="9" stroke-linecap="round"
+              stroke-dasharray="270.18" stroke-dashoffset="270.18"/></svg>
+          <div class="pct"><b id="pct">–</b><span id="pctnote">of stage</span></div>
+        </div>
+        <div class="text">
+          <div class="stage" id="stage">–</div>
+          <div class="steps" id="steps"></div>
+          <div class="note" id="statusText"></div>
+        </div>
+      </div>
+      <div class="strip" id="strip"></div>
+      <div class="strip-names" id="stripNames"></div>
+      <div class="facts" id="facts"></div>
+    </section>
+
+    <div class="label" style="margin:18px 2px 10px">Training details</div>
+    <div class="tiles" id="tiles"></div>
+    <section class="card">
+      <div class="label">Learning mix &amp; areas (newest cycle)</div>
+      <div class="mix" id="mix"></div>
+      <div class="areas" id="areas"></div>
+    </section>
+
+    <section class="card">
+      <div class="label">Held-out loss per cycle</div>
+      <svg id="chart" viewBox="0 0 360 220" role="img" aria-label="Held-out loss chart"></svg>
+      <div class="legend">
+        <span><i style="background:#3b82f6"></i>Text</span>
+        <span><i style="background:#FC0D03"></i>Conversation</span>
+        <span><i class="bar" style="background:#facc15"></i>New text (right)</span>
+      </div>
+      <div class="note">Loss on test text Kraken never trains on. Lower is better.</div>
+    </section>
+  </main>
+  <div class="foot" id="foot"></div>
+</div>
+<script>
+"use strict";
+const OWNER = "alnilam24", FILE = "kraken.json", POLL = 30000;
+const AREA = {language:"#e5484d", knowledge:"#3b82f6", coding:"#22c55e", logic:"#f59e0b"};
+const $ = id => document.getElementById(id);
+let gist = location.hash.replace(/^#/, "").trim(), data = null, fetchedOk = 0, lastError = "";
+try { if (gist) localStorage.setItem("gist", gist); else gist = localStorage.getItem("gist") || ""; } catch (e) {}
+
+const fmt = n => n == null ? "–" : Math.round(n).toLocaleString("en-US");
+const loss = n => n == null ? "–" : n.toFixed(3);
+const clock = t => new Date(t * 1000).toLocaleTimeString([], {hour: "2-digit", minute: "2-digit"});
+function dur(s) {
+  s = Math.max(0, Math.round(s));
+  const h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60);
+  return h ? `${h} h ${m} min` : m ? `${m} min` : `${s} s`;
+}
+function short(n) {
+  if (n == null) return "–";
+  return n >= 1e6 ? (n / 1e6).toFixed(1) + "M" : n >= 1e3 ? (n / 1e3).toFixed(0) + "k" : String(n);
+}
+function delta(now, before) {
+  if (now == null || before == null) return {text: "", cls: ""};
+  const d = now - before;
+  return {text: (d > 0 ? "+" : "") + d.toFixed(3) + " this cycle", cls: d < 0 ? "good" : d > 0 ? "bad" : ""};
+}
+function el(tag, attrs = {}, text) {
+  const node = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) node.setAttribute(k, v);
+  if (text != null) node.textContent = text;
+  return node;
+}
+
+async function load() {
+  if (!gist) return;
+  try {
+    const response = await fetch(`https://gist.githubusercontent.com/${OWNER}/${encodeURIComponent(gist)}/raw/${FILE}?t=${Date.now()}`, {cache: "no-store"});
+    if (!response.ok) throw new Error("GitHub answered " + response.status);
+    const next = await response.json();
+    if (next && next.v) { data = next; fetchedOk = Date.now(); lastError = ""; render(); }
+  } catch (error) { lastError = error.message || "no connection"; }
+  tick();
+}
+
+function render() {
+  const d = data, now = Date.now() / 1000;
+  $("main").hidden = false;
+  $("model").textContent = `${d.model || "Kraken"} · ${fmt(d.total_steps)} steps trained`;
+  const stages = d.stages || [], names = Object.fromEntries(stages.map(s => [s[0], s[1]]));
+  const colors = Object.fromEntries(stages.map(s => [s[0], s[2]]));
+  const running = !!d.running && d.source !== "stopped";
+  const [done, total] = d.progress || [0, 0];
+  const share = running && total ? Math.min(1, done / total) : 0;
+
+  $("stage").textContent = running ? (names[d.stage] || d.stage || "Training") : "Not training";
+  $("steps").textContent = running && total ? `${fmt(done)} / ${fmt(total)} ${["general", "conversation"].includes(d.stage) ? "steps" : ""}${d.source === "estimated" ? " (≈)" : ""}` : "";
+  $("statusText").textContent = d.status || "";
+  $("pct").textContent = running && total ? Math.round(share * 100) + "%" : "–";
+  const bar = $("ringbar");
+  bar.style.stroke = colors[d.stage] || "#FC0D03";
+  bar.style.strokeDashoffset = String(270.18 * (1 - share));
+
+  // Cycle strip: finished parts in their colour, the running part filling up, skipped parts striped.
+  const strip = $("strip"), stripNames = $("stripNames");
+  strip.replaceChildren(); stripNames.replaceChildren();
+  const index = stages.findIndex(s => s[0] === d.stage), skipped = new Set(d.skipped || []);
+  stages.forEach(([key, title, color], i) => {
+    const part = el("div");
+    if (skipped.has(key)) part.className = "skip";
+    else {
+      const fill = el("span");
+      fill.style.background = color;
+      fill.style.width = !running ? "0" : i < index ? "100%" : i === index ? (total ? share * 100 : 50) + "%" : "0";
+      part.append(fill);
+    }
+    strip.append(part);
+    stripNames.append(el("div", running && i === index ? {class: "now"} : {}, title));
+  });
+
+  const facts = [];
+  if (d.cycle) facts.push(["Cycle", `${d.cycle}${d.cycles_done != null ? ` · ${d.cycles_done} done this run` : ""}`]);
+  if (running && d.cycle_started) facts.push(["Cycle running for", dur(now - d.cycle_started)]);
+  if (running && d.cycle_started && d.cycle_expected) facts.push(["Cycle ends ≈", clock(d.cycle_started + d.cycle_expected)]);
+  if (running && d.learning_started) facts.push(["Learning for", dur(now - d.learning_started)]);
+  if (d.finishing) facts.push(["After this cycle", "stops"]);
+  const g = d.gpu;
+  if (g) {
+    facts.push(["GPU", `${fmt(g.util)}% · ${fmt(g.power)} W · ${fmt(g.temp)} °C`]);
+    facts.push(["VRAM", `${(g.vram_used / 1024).toFixed(1)} / ${(g.vram_total / 1024).toFixed(1)} GB`]);
+  }
+  $("facts").replaceChildren(...facts.map(([k, v]) => { const box = el("div"); box.append(el("small", {}, k), el("b", {}, v)); return box; }));
+
+  renderDetails(d);
+  renderChart(d.history || []);
+}
+
+function renderDetails(d) {
+  const rows = d.history || [], last = rows[rows.length - 1] || {}, s = d.settings || {};
+  const before = last.before || {};
+  const text = delta(last.text, before.text), chat = delta(last.chat, before.chat);
+  const lessons = rows.slice(-3).reduce((sum, r) => sum + (r.lessons || 0), 0);
+  const tiles = [
+    ["Text loss", loss(last.text), text.text, text.cls],
+    ["Chat loss", loss(last.chat), chat.text, chat.cls],
+    ["Cycles", fmt(rows.filter(r => r.complete).length), `newest saved ${last.time ? last.time.slice(5).replace("-", ".") : "–"}`, ""],
+    ["Steps", short(d.total_steps), last.steps ? `+${fmt(last.steps)} in cycle ${last.n}` : "", ""],
+    ["New text", short(last.added), "word pieces, last cycle", ""],
+    ["Teacher", s.teacher ? (lessons ? fmt(lessons) : "0") : "off",
+      s.teacher ? `lessons in the last 3 cycles · ${(s.teacher_engine || "").replace("local:", "")}` : "", s.teacher && !lessons ? "bad" : ""],
+  ];
+  $("tiles").replaceChildren(...tiles.map(([k, v, note, cls]) => {
+    const tile = el("div", {class: "tile"});
+    tile.append(el("small", {}, k), el("b", cls === "bad" && k === "Teacher" ? {class: "bad"} : {}, v), el("em", cls && k !== "Teacher" ? {class: cls} : {}, note));
+    return tile;
+  }));
+  const mix = s.mix || {}, mixBox = $("mix");
+  mixBox.replaceChildren(...["language", "knowledge", "coding", "logic"].filter(a => mix[a]).map(a => {
+    const part = el("div", {}, mix[a] >= 9 ? `${mix[a]}%` : "");
+    part.style.background = AREA[a]; part.style.flex = mix[a];
+    return part;
+  }));
+  const areas = last.areas || {};
+  $("areas").replaceChildren(...["language", "knowledge", "coding", "logic"].map(a => {
+    const row = el("div"), name = el("span"), dot = el("i");
+    dot.style.background = AREA[a]; name.append(dot, document.createTextNode(`${a[0].toUpperCase() + a.slice(1)} ${mix[a] != null ? mix[a] + "%" : ""}`));
+    row.append(name, el("b", {}, loss(areas[a])));
+    return row;
+  }));
+}
+
+function renderChart(rows) {
+  const svg = $("chart"), NS = "http://www.w3.org/2000/svg";
+  svg.replaceChildren();
+  const add = (tag, attrs, text) => { const n = document.createElementNS(NS, tag); for (const k in attrs) n.setAttribute(k, attrs[k]); if (text != null) n.textContent = text; svg.append(n); return n; };
+  const points = rows.filter(r => r.text != null || r.chat != null);
+  if (points.length < 2) { add("text", {x: 180, y: 110, fill: "#8b93a2", "text-anchor": "middle", "font-size": 12}, "Not enough cycles yet"); return; }
+  const W = 360, H = 220, L = 34, R = 30, T = 10, B = 26;
+  const values = points.flatMap(r => [r.text, r.chat]).filter(v => v != null);
+  // Ignore the first, very high losses of a fresh model so the recent cycles stay readable.
+  const recent = values.slice(-Math.max(10, values.length * 0.7));
+  let lo = Math.min(...recent), hi = Math.max(...recent);
+  const pad = Math.max(0.02, (hi - lo) * 0.12); lo = Math.floor((lo - pad) * 20) / 20; hi = Math.ceil((hi + pad) * 20) / 20;
+  const maxAdded = Math.max(1, ...points.map(r => r.added || 0));
+  const x = i => L + i * (W - L - R) / (points.length - 1);
+  const y = v => T + (H - T - B) * (1 - (Math.min(hi, Math.max(lo, v)) - lo) / (hi - lo));
+  const steps = 4;
+  for (let k = 0; k <= steps; k++) {
+    const v = lo + (hi - lo) * k / steps, yy = y(v);
+    add("line", {x1: L, x2: W - R, y1: yy, y2: yy, stroke: "#242a35", "stroke-width": 1});
+    add("text", {x: L - 5, y: yy + 3.5, fill: "#5b6371", "font-size": 9.5, "text-anchor": "end"}, v.toFixed(2));
+  }
+  add("text", {x: W - R + 4, y: T + 8, fill: "#a1882a", "font-size": 9}, short(maxAdded));
+  const barW = Math.max(2, (W - L - R) / points.length * 0.55);
+  points.forEach((r, i) => {
+    if (!r.added) return;
+    const h = (H - T - B) * 0.45 * r.added / maxAdded;
+    add("rect", {x: x(i) - barW / 2, y: H - B - h, width: barW, height: h, rx: 1.5, fill: "#facc15", opacity: 0.32});
+  });
+  for (const [key, color] of [["text", "#3b82f6"], ["chat", "#FC0D03"]]) {
+    const path = points.map((r, i) => r[key] == null ? null : `${x(i).toFixed(1)},${y(r[key]).toFixed(1)}`).filter(Boolean);
+    add("polyline", {points: path.join(" "), fill: "none", stroke: color, "stroke-width": 2.2, "stroke-linejoin": "round", "stroke-linecap": "round"});
+    const lastIndex = points.length - 1;
+    if (points[lastIndex][key] != null) add("circle", {cx: x(lastIndex), cy: y(points[lastIndex][key]), r: 3.4, fill: color, stroke: "#12161d", "stroke-width": 1.5});
+  }
+  const every = Math.ceil(points.length / 7);
+  points.forEach((r, i) => {
+    const lastIndex = points.length - 1;
+    if (i !== lastIndex && (i % every || lastIndex - i < every * 0.6)) return;
+    add("text", {x: x(i), y: H - 9, fill: "#5b6371", "font-size": 9.5, "text-anchor": "middle"}, r.n);
+  });
+}
+
+function tick() {
+  const pill = $("pill"), label = pill.querySelector("span");
+  if (!gist) { $("setup").hidden = false; label.textContent = "NO LINK"; pill.className = "pill off"; return; }
+  if (!data) { label.textContent = lastError ? "OFFLINE" : "LOADING"; pill.className = lastError ? "pill off" : "pill"; $("foot").textContent = lastError; return; }
+  const age = Date.now() / 1000 - data.updated;
+  if (age > 180) { label.textContent = "NO SIGNAL"; pill.className = "pill off"; }
+  else if (data.source === "live") { label.textContent = "LIVE"; pill.className = "pill live"; }
+  else if (data.source === "estimated") { label.textContent = "ESTIMATED"; pill.className = "pill est"; }
+  else { label.textContent = "STOPPED"; pill.className = "pill"; }
+  $("foot").textContent = `PC updated ${dur(age)} ago · checked ${dur((Date.now() - fetchedOk) / 1000)} ago` +
+    (age > 180 ? " · the PC has not sent anything for a while (off, asleep or no internet)" : "") + (lastError ? ` · ${lastError}` : "");
+}
+
+load();
+setInterval(load, POLL);
+setInterval(() => { if (data) { tick(); } }, 1000);
+setInterval(() => { if (data) render(); }, 15000);
+document.addEventListener("visibilitychange", () => { if (!document.hidden) load(); });
+window.addEventListener("hashchange", () => { gist = location.hash.replace(/^#/, "").trim(); try { localStorage.setItem("gist", gist); } catch (e) {} data = null; load(); });
+</script>
+</body>
+</html>
