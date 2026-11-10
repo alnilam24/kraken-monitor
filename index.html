@@ -79,6 +79,21 @@ header .sub{font-size:12px;color:var(--muted)}
 #chart{width:100%;height:auto;display:block;margin-top:2px}
 .foot{font-size:11.5px;color:var(--faint);text-align:center;margin-top:16px}
 .empty{color:var(--muted);font-size:14px;padding:30px 0;text-align:center}
+.conn{display:flex;gap:6px}
+.conn span{width:30px;height:30px;border-radius:9px;background:var(--surface-hi);color:var(--ok);display:flex;align-items:center;justify-content:center}
+.conn span.off{color:var(--red-soft);background:var(--red-tint)}
+.conn span.unknown{color:var(--faint)}
+.conn svg{width:17px;height:17px}
+.banner{display:flex;gap:10px;align-items:center;background:var(--red-tint);border:1px solid #4a1a1b;color:var(--red-soft);
+  border-radius:14px;padding:11px 14px;margin-bottom:var(--gap);font-size:13.5px}
+.banner svg{flex:none;width:20px;height:20px}
+.banner[hidden]{display:none}
+.net{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 14px}
+.net small{display:block;font-size:11px;color:var(--muted)}
+.net b{font-size:19px;font-weight:700;font-variant-numeric:tabular-nums}
+.net b span{font-size:12px;color:var(--muted);font-weight:600;margin-left:3px}
+.net em{display:block;font-style:normal;font-size:11.5px;color:var(--faint);font-variant-numeric:tabular-nums}
+#netchart{width:100%;height:auto;display:block;margin-top:12px}
 @media (max-width:360px){.ring{width:88px;height:88px}.tile b{font-size:21px}}
 /* iPad and wider: status left, details right, the chart across the full width */
 @media (min-width:700px){
@@ -105,10 +120,12 @@ header .sub{font-size:12px;color:var(--muted)}
   <header>
     <img src="icon-180.png" alt="">
     <div class="names"><h1>Kraken</h1><div class="sub" id="model">FMC AI · training monitor</div></div>
+    <div class="conn" id="conn"></div>
     <div class="pill" id="pill"><i></i><span>…</span></div>
   </header>
 
   <div id="setup" class="card empty" hidden>Open the full link with the gist ID after the <b>#</b>.</div>
+  <div id="banner" class="banner" hidden></div>
 
   <main id="main" hidden>
     <section class="card status-card">
@@ -138,6 +155,17 @@ header .sub{font-size:12px;color:var(--muted)}
         <div class="label">Learning mix &amp; areas (newest cycle)</div>
         <div class="mix" id="mix"></div>
         <div class="areas" id="areas"></div>
+      </section>
+      <section class="card">
+        <div class="label">Network</div>
+        <div class="net" id="net"></div>
+        <svg id="netchart" viewBox="0 0 360 96" role="img" aria-label="PC network speed, last hour"></svg>
+        <div class="legend">
+          <span><i style="background:#3ddc84"></i>Download</span>
+          <span><i style="background:#a78bfa"></i>Upload</span>
+          <span><i class="bar" style="background:#FC0D03"></i>No internet</span>
+        </div>
+        <div class="note" id="netnote"></div>
       </section>
     </div>
 
@@ -190,7 +218,7 @@ function el(tag, attrs = {}, text) {
 // help). The API is always current but allows only 60 calls per hour (304 answers count too), so it is asked
 // at most every 90 s and only when the raw copy looks old. The newer of the two wins.
 const API_EVERY = 90000;
-let apiPausedUntil = 0, lastApi = 0, loading = false, lastTry = 0, rate = 0;
+let apiPausedUntil = 0, lastApi = 0, loading = false, lastTry = 0, rate = 0, phonePing = null;
 async function fetchApi() {
   try {
     lastApi = Date.now();
@@ -210,10 +238,12 @@ async function fetchApi() {
 async function fetchData() {
   let best = null, failure = null;
   try {
+    const started = performance.now();
     const response = await fetch(`https://gist.githubusercontent.com/${OWNER}/${encodeURIComponent(gist)}/raw/${FILE}?t=${Date.now()}`, {cache: "no-store"});
+    phonePing = performance.now() - started;  // until the answer starts: about one round trip plus GitHub's time
     if (!response.ok) throw new Error("GitHub answered " + response.status);
     best = await response.json();
-  } catch (error) { failure = error; }
+  } catch (error) { failure = error; phonePing = null; }
   if (data && best && data.updated > best.updated) best = data;  // never step back to an older copy
   const old = !best || (best.running && Date.now() / 1000 - best.updated > 75);
   if (old && Date.now() - lastApi > API_EVERY && Date.now() > apiPausedUntil) {
@@ -241,6 +271,7 @@ async function load() {
   } catch (error) { lastError = error.message || "no connection"; }
   loading = false;
   tick();
+  showConnection();
 }
 
 // Progress as it is now: the uploaded step count plus what the training speed adds since the upload.
@@ -304,7 +335,91 @@ function render() {
   $("facts").replaceChildren(...facts.map(([k, v]) => { const box = el("div"); box.append(el("small", {}, k), el("b", {}, v)); return box; }));
 
   renderDetails(d);
+  renderNet(d.net);
   renderChart(d.history || []);
+}
+
+// ---- Network: this device and the PC ----
+const ICON = {
+  wifi: '<path d="M2 8.5a15 15 0 0 1 20 0M5.2 12a10.5 10.5 0 0 1 13.6 0M8.5 15.4a5.5 5.5 0 0 1 7 0"/><circle cx="12" cy="19" r="1.3" fill="currentColor" stroke="none"/>',
+  pc: '<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8.5 20h7M12 16v4"/>',
+  slash: '<path d="M3 3l18 18" stroke-width="2.4"/>',
+};
+const svgIcon = (body, off) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${body}${off ? ICON.slash : ""}</svg>`;
+const mbs = v => v == null ? "–" : v === 0 ? "0" : v >= 10 ? v.toFixed(0) : v >= 1 ? v.toFixed(1) : v >= 0.1 ? v.toFixed(2) : v.toFixed(3);
+const ms = v => v == null ? "–" : String(Math.round(v));
+const pingClass = v => v == null ? "bad" : v < 60 ? "good" : v < 200 ? "" : "bad";
+
+function phoneOnline() { return navigator.onLine !== false && !(lastError && Date.now() - fetchedOk > POLL * 2); }
+function pcSilent() { return !data || Date.now() / 1000 - data.updated > (data.running ? 180 : 900); }
+
+// Header icons and the red banner; runs every second because both depend on the clock.
+function showConnection() {
+  const phone = phoneOnline(), pc = !data ? null : !pcSilent() && !(data.net && data.net.online === false);
+  const conn = $("conn");
+  conn.innerHTML = `<span class="${phone ? "" : "off"}" title="This device">${svgIcon(ICON.wifi, !phone)}</span>` +
+    `<span class="${pc == null ? "unknown" : pc ? "" : "off"}" title="Training PC">${svgIcon(ICON.pc, pc === false)}</span>`;
+  const banner = $("banner");
+  let text = "";
+  if (!phone) text = `No internet on this device${data ? ` · showing data from ${clock(data.updated)}` : ""}`;
+  else if (data && pcSilent() && data.running) text = `The PC has not reported since ${clock(data.updated)} · off, asleep or no internet`;
+  banner.hidden = !text;
+  if (text) banner.innerHTML = svgIcon(phone ? ICON.pc : ICON.wifi, true) + `<span>${text}</span>`;
+}
+
+function renderNet(n) {
+  const box = $("net"), chart = $("netchart");
+  if (!n) {
+    box.replaceChildren(el("div", {}, "The PC sends network data from the next monitor version on."));
+    chart.replaceChildren(); $("netnote").textContent = "";
+    return;
+  }
+  const cell = (title, value, unit, cls, sub) => {
+    const node = el("div"), b = el("b", cls ? {class: cls} : {}, value);
+    if (unit) b.append(el("span", {}, unit));
+    node.append(el("small", {}, title), b);
+    if (sub) node.append(el("em", {}, sub));
+    return node;
+  };
+  const day = n.outages || [], lost = day.reduce((sum, o) => sum + o[1], 0);
+  box.replaceChildren(
+    cell("PC ping", n.online ? ms(n.ping) : "offline", n.online ? "ms" : "", pingClass(n.online ? n.ping : null), n.adapter ? `${n.adapter}${n.link ? ` · link ${fmt(n.link)} Mbit/s` : ""}` : ""),
+    cell("Phone → GitHub", phoneOnline() ? ms(phonePing) : "offline", phoneOnline() ? "ms" : "", pingClass(phoneOnline() ? phonePing : null), "includes GitHub's answer time"),
+    cell("Download", mbs(n.down), "MB/s", "", `${mbs(n.down == null ? null : n.down * 8)} Mbit/s · peak ${mbs(n.peak)} MB/s`),
+    cell("Upload", mbs(n.up), "MB/s", "", `${mbs(n.up == null ? null : n.up * 8)} Mbit/s`),
+  );
+  $("netnote").textContent = day.length
+    ? `PC internet dropped ${day.length}× in the last 24 h (${dur(lost)} in total), last at ${clock(day[day.length - 1][0])}.`
+    : "No internet dropouts on the PC in the last 24 h (checked every 30 s).";
+  renderNetChart(n);
+}
+
+// Download (area) and upload (line) over the last hour, red bands where the PC had no internet.
+function renderNetChart(n) {
+  const svg = $("netchart"), points = n.speeds || [];
+  const W = Math.max(280, Math.round(svg.getBoundingClientRect().width) || 360), H = 96, L = 34, R = 6, T = 8, B = 18;
+  svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+  svg.replaceChildren();
+  const add = (tag, attrs, text) => { const node = document.createElementNS("http://www.w3.org/2000/svg", tag); for (const [k, v] of Object.entries(attrs)) node.setAttribute(k, v); if (text != null) node.textContent = text; svg.append(node); return node; };
+  if (points.length < 2) { add("text", {x: W / 2, y: H / 2, fill: "#5b6371", "font-size": 11, "text-anchor": "middle"}, "Speed graph appears after a minute"); return; }
+  const t0 = points[0][0], t1 = points[points.length - 1][0], span = Math.max(1, t1 - t0);
+  const top = Math.max(0.1, ...points.map(p => Math.max(p[1] || 0, p[2] || 0))) * 1.15;
+  const x = t => L + (t - t0) / span * (W - L - R), y = v => T + (1 - (v || 0) / top) * (H - T - B);
+  for (const [start, seconds] of n.outages || []) {
+    const a = Math.max(t0, start), b = Math.min(t1, start + seconds);
+    if (b > a) add("rect", {x: x(a), y: T, width: Math.max(2, x(b) - x(a)), height: H - T - B, fill: "#FC0D03", opacity: .28});
+  }
+  [0, top / 2, top].forEach(v => {
+    add("line", {x1: L, x2: W - R, y1: y(v), y2: y(v), stroke: "#242a35", "stroke-width": 1});
+    add("text", {x: L - 5, y: y(v) + 3.5, fill: "#5b6371", "font-size": 9.5, "text-anchor": "end"}, mbs(v));
+  });
+  const line = i => points.map(p => `${x(p[0]).toFixed(1)},${y(p[i]).toFixed(1)}`).join(" ");
+  add("polygon", {points: `${x(t0)},${y(0)} ${line(1)} ${x(t1)},${y(0)}`, fill: "#3ddc84", opacity: .18});
+  add("polyline", {points: line(1), fill: "none", stroke: "#3ddc84", "stroke-width": 1.8, "stroke-linejoin": "round"});
+  add("polyline", {points: line(2), fill: "none", stroke: "#a78bfa", "stroke-width": 1.5, "stroke-linejoin": "round"});
+  add("text", {x: L, y: H - 4, fill: "#5b6371", "font-size": 9.5}, clock(t0));
+  add("text", {x: W - R, y: H - 4, fill: "#5b6371", "font-size": 9.5, "text-anchor": "end"}, clock(t1));
+  add("text", {x: (L + W - R) / 2, y: H - 4, fill: "#5b6371", "font-size": 9.5, "text-anchor": "middle"}, "MB/s");
 }
 
 function renderDetails(d) {
@@ -402,7 +517,8 @@ function tick() {
 load();
 setInterval(load, POLL);
 // Every second: move the counter on, and fetch again if a poll was missed (iOS pauses timers in the background).
-setInterval(() => { if (data) { showProgress(); tick(); } if (Date.now() - lastTry > POLL * 1.5) load(); }, 1000);
+setInterval(() => { if (data) { showProgress(); tick(); } showConnection(); if (Date.now() - lastTry > POLL * 1.5) load(); }, 1000);
+window.addEventListener("offline", () => { showConnection(); tick(); });
 setInterval(() => { if (data) render(); }, 15000);
 document.addEventListener("visibilitychange", () => { if (!document.hidden) load(); });
 for (const name of ["pageshow", "focus", "online"]) window.addEventListener(name, () => load());
