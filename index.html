@@ -156,7 +156,7 @@ header .sub{font-size:12px;color:var(--muted)}
 </div>
 <script>
 "use strict";
-const OWNER = "alnilam24", FILE = "kraken.json", POLL = 30000;
+const OWNER = "alnilam24", FILE = "kraken.json", POLL = 15000;
 const AREA = {language:"#e5484d", knowledge:"#3b82f6", coding:"#22c55e", logic:"#f59e0b"};
 const $ = id => document.getElementById(id);
 let gist = location.hash.replace(/^#/, "").trim(), data = null, fetchedOk = 0, lastError = "";
@@ -186,15 +186,78 @@ function el(tag, attrs = {}, text) {
   return node;
 }
 
-async function load() {
-  if (!gist) return;
+// The raw gist link has no limit but lags 1-2 minutes behind new uploads (GitHub caches it, a ?t= does not
+// help). The API is always current but allows only 60 calls per hour (304 answers count too), so it is asked
+// at most every 90 s and only when the raw copy looks old. The newer of the two wins.
+const API_EVERY = 90000;
+let apiPausedUntil = 0, lastApi = 0, loading = false, lastTry = 0, rate = 0;
+async function fetchApi() {
+  try {
+    lastApi = Date.now();
+    const response = await fetch(`https://api.github.com/gists/${encodeURIComponent(gist)}`, {headers: {Accept: "application/vnd.github+json"}, cache: "no-store"});
+    if (response.ok) {
+      const file = (await response.json()).files[FILE];
+      return file && !file.truncated ? JSON.parse(file.content) : null;
+    }
+    if (response.status === 403 || response.status === 429) {  // limit used up (e.g. phone and iPad on one Wi-Fi)
+      const reset = Number(response.headers.get("X-RateLimit-Reset"));
+      apiPausedUntil = reset ? reset * 1000 : Date.now() + 600000;
+    }
+  } catch (error) { /* the raw copy still works */ }
+  return null;
+}
+
+async function fetchData() {
+  let best = null, failure = null;
   try {
     const response = await fetch(`https://gist.githubusercontent.com/${OWNER}/${encodeURIComponent(gist)}/raw/${FILE}?t=${Date.now()}`, {cache: "no-store"});
     if (!response.ok) throw new Error("GitHub answered " + response.status);
-    const next = await response.json();
-    if (next && next.v) { data = next; fetchedOk = Date.now(); lastError = ""; render(); }
+    best = await response.json();
+  } catch (error) { failure = error; }
+  if (data && best && data.updated > best.updated) best = data;  // never step back to an older copy
+  const old = !best || (best.running && Date.now() / 1000 - best.updated > 75);
+  if (old && Date.now() - lastApi > API_EVERY && Date.now() > apiPausedUntil) {
+    const fresh = await fetchApi();
+    if (fresh && fresh.v && (!best || fresh.updated > best.updated)) best = fresh;
+  }
+  if (!best && failure) throw failure;
+  return best;
+}
+
+async function load() {
+  if (!gist || loading) return;
+  loading = true; lastTry = Date.now();
+  try {
+    const next = await fetchData();
+    if (next && next.v) {
+      // Steps per second from two uploads in the same stage, so the counter can move between uploads.
+      if (data && next !== data && next.stage === data.stage && next.cycle === data.cycle && next.updated > data.updated && next.progress && data.progress)
+        rate = Math.max(0, (next.progress[0] - data.progress[0]) / (next.updated - data.updated));
+      else if (data && next !== data && next.stage !== data.stage) rate = 0;
+      const changed = next !== data;
+      data = next; fetchedOk = Date.now(); lastError = "";
+      if (changed) render();
+    }
   } catch (error) { lastError = error.message || "no connection"; }
+  loading = false;
   tick();
+}
+
+// Progress as it is now: the uploaded step count plus what the training speed adds since the upload.
+function progressNow(d) {
+  const [done, total] = d.progress || [0, 0];
+  if (!rate || d.source !== "live" || !["general", "conversation"].includes(d.stage)) return [done, total];
+  const since = Math.min(Date.now() / 1000 - d.updated, 300);
+  return [Math.min(total, Math.round(done + rate * Math.max(0, since))), total];
+}
+
+function showProgress() {
+  const d = data, running = !!d.running && d.source !== "stopped";
+  const [done, total] = progressNow(d), share = running && total ? Math.min(1, done / total) : 0;
+  $("steps").textContent = running && total ? `${fmt(done)} / ${fmt(total)} ${["general", "conversation"].includes(d.stage) ? "steps" : ""}${d.source === "estimated" ? " (≈)" : ""}` : "";
+  $("pct").textContent = running && total ? Math.round(share * 100) + "%" : "–";
+  $("ringbar").style.strokeDashoffset = String(270.18 * (1 - share));
+  return share;
 }
 
 function render() {
@@ -204,16 +267,11 @@ function render() {
   const stages = d.stages || [], names = Object.fromEntries(stages.map(s => [s[0], s[1]]));
   const colors = Object.fromEntries(stages.map(s => [s[0], s[2]]));
   const running = !!d.running && d.source !== "stopped";
-  const [done, total] = d.progress || [0, 0];
-  const share = running && total ? Math.min(1, done / total) : 0;
-
+  const total = (d.progress || [0, 0])[1];
   $("stage").textContent = running ? (names[d.stage] || d.stage || "Training") : "Not training";
-  $("steps").textContent = running && total ? `${fmt(done)} / ${fmt(total)} ${["general", "conversation"].includes(d.stage) ? "steps" : ""}${d.source === "estimated" ? " (≈)" : ""}` : "";
   $("statusText").textContent = d.status || "";
-  $("pct").textContent = running && total ? Math.round(share * 100) + "%" : "–";
-  const bar = $("ringbar");
-  bar.style.stroke = colors[d.stage] || "#FC0D03";
-  bar.style.strokeDashoffset = String(270.18 * (1 - share));
+  $("ringbar").style.stroke = colors[d.stage] || "#FC0D03";
+  const share = showProgress();
 
   // Cycle strip: finished parts in their colour, the running part filling up, skipped parts striped.
   const strip = $("strip"), stripNames = $("stripNames");
@@ -343,9 +401,12 @@ function tick() {
 
 load();
 setInterval(load, POLL);
-setInterval(() => { if (data) { tick(); } }, 1000);
+// Every second: move the counter on, and fetch again if a poll was missed (iOS pauses timers in the background).
+setInterval(() => { if (data) { showProgress(); tick(); } if (Date.now() - lastTry > POLL * 1.5) load(); }, 1000);
 setInterval(() => { if (data) render(); }, 15000);
 document.addEventListener("visibilitychange", () => { if (!document.hidden) load(); });
+for (const name of ["pageshow", "focus", "online"]) window.addEventListener(name, () => load());
+$("pill").addEventListener("click", () => load());  // tap the badge to check right now
 let resizeTimer = 0;
 window.addEventListener("resize", () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(() => { if (data) render(); }, 150); });
 window.addEventListener("hashchange", () => { gist = location.hash.replace(/^#/, "").trim(); try { localStorage.setItem("gist", gist); } catch (e) {} data = null; load(); });
