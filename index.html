@@ -332,13 +332,13 @@ function tick() {
   const pill = $("pill"), label = pill.querySelector("span");
   if (!gist) { $("setup").hidden = false; label.textContent = "NO LINK"; pill.className = "pill off"; return; }
   if (!data) { label.textContent = lastError ? "OFFLINE" : "LOADING"; pill.className = lastError ? "pill off" : "pill"; $("foot").textContent = lastError; return; }
-  const age = Date.now() / 1000 - data.updated;
-  if (age > 180) { label.textContent = "NO SIGNAL"; pill.className = "pill off"; }
+  const age = Date.now() / 1000 - data.updated, limit = data.running ? 180 : 900;  // idle PCs report every 10 min
+  if (age > limit) { label.textContent = "NO SIGNAL"; pill.className = "pill off"; }
   else if (data.source === "live") { label.textContent = "LIVE"; pill.className = "pill live"; }
   else if (data.source === "estimated") { label.textContent = "ESTIMATED"; pill.className = "pill est"; }
   else { label.textContent = "STOPPED"; pill.className = "pill"; }
   $("foot").textContent = `PC updated ${dur(age)} ago · checked ${dur((Date.now() - fetchedOk) / 1000)} ago` +
-    (age > 180 ? " · the PC has not sent anything for a while (off, asleep or no internet)" : "") + (lastError ? ` · ${lastError}` : "");
+    (age > limit ? " · the PC has not sent anything for a while (off, asleep or no internet)" : "") + (lastError ? ` · ${lastError}` : "");
 }
 
 load();
