@@ -314,7 +314,7 @@ INFO["Rumpfdrehbeugen"]={w:"Im Stehen abwechselnd mit einer Hand zum gegenüberl
 INFO["Satz-Kästchen"]={w:"Jedes Kästchen ist ein Satz. Bei „4 × 6–12“ hast du vier Kästchen für vier Sätze.",s:["Satz machen.","Kästchen antippen, es wird farbig.","Pause laut Angabe, dann der nächste Satz.","Sind alle Kästchen voll, kommt die nächste Übung."],t:"So verlierst du nie den Überblick, wie viele Sätze du schon hast. Wenn die ganze Einheit fertig ist, oben rechts den Haken antippen."};
 INFO["10-km-Lauf auf Zeit"]={w:"Alle acht Wochen läufst du deine 10 km zügig auf Zeit statt des Tempolaufs. Er liegt immer direkt nach einer Entlastungswoche, damit du ausgeruht bist.",s:["15 min locker einlaufen.","10 km zügig und gleichmäßig. Starte etwas langsamer, als du denkst, und werde zum Ende schneller, wenn es geht.","10 min locker auslaufen.","Werte eintragen, die Zeit landet in der Statistik."],t:"Am Sonntag danach ist trotzdem der lange lockere Lauf. Lauf den dann wirklich ruhig."};
 INFO["Wiegen"]={w:"Dein Gewicht schwankt am Tag um bis zu 1–2 kg, je nach Essen, Trinken und Toilette. Damit die Werte vergleichbar sind, wiegst du dich immer gleich.",s:["Montag, Mittwoch, Freitag und Sonntag.","Morgens direkt nach dem Aufstehen und nach der Toilette.","Vor dem Essen und Trinken.","In Unterwäsche, immer auf derselben Waage am selben Platz.","Wert sofort in der App eintragen."],t:"Einzelne Werte sind egal. Die App rechnet den Wochenschnitt aus, und nur der zählt."};
-INFO["Krafttest"]={w:"Alle acht Wochen misst du, wie stark du geworden bist. Die Werte landen in der Statistik.",s:["Normal aufwärmen: 8–10 min rudern, dann 10 lockere Liegestütze.","Liegestütze-Test: mit dem angegebenen Rucksack-Gewicht so viele saubere Wiederholungen wie möglich. Brust bis eine Faust über dem Boden, oben Arme gestreckt, Körper gerade.","3 Minuten Pause.","Klimmzug-Test in der Schule: aus dem toten Hang, Ristgriff, Kinn über die Stange, kein Schwung. So viele wie möglich.","Danach Kraft A ohne Liegestütze und Klimmzüge. Die hast du im Test schon gemacht, die App blendet sie aus."],t:"Der Test kommt bewusst zuerst, weil du nur ausgeruht deinen echten Bestwert schaffst. Gezählt wird nur, was sauber war."};
+INFO["Krafttest"]={w:"Alle acht Wochen misst du am Mittwoch in etwa 15 Minuten, wie stark du geworden bist. Die Werte landen in der Statistik.",s:["Normal aufwärmen: 8–10 min rudern, dann 10 lockere Liegestütze.","Liegestütze-Test: mit dem angegebenen Rucksack-Gewicht so viele saubere Wiederholungen wie möglich. Brust bis eine Faust über dem Boden, oben Arme gestreckt, Körper gerade.","3 Minuten Pause.","Klimmzug-Test in der Schule: aus dem toten Hang, Ristgriff, Kinn über die Stange, kein Schwung. So viele wie möglich.","Mehr nicht. Der Rest des Tages bleibt frei."],t:"Der Test liegt am Mittwoch, zwei Tage nach Kraft A. So bist du ausgeruht und schaffst deinen echten Bestwert. Gezählt wird nur, was sauber war."};
 INFO["5-km-Test"]={w:"Alle acht Wochen läufst du 5 km auf Zeit. Daraus berechnet die App deine Laufgeschwindigkeiten neu.",s:["Flache Strecke oder Bahn, am besten immer dieselbe.","15 min locker einlaufen, dabei 3 Steigerungen über 15–20 Sekunden.","5 km so schnell, wie du gleichmäßig durchhältst. Der erste Kilometer nicht schneller als der Rest.","10 min locker auslaufen.","Unten Distanz, Zeit und Puls eintragen und Art „5-km-Test“ lassen."],t:"Am Vortag ist Ruhe oder nur Krafttraining, also bist du ausgeruht."};
 INFO["Rucksack-Gewicht"]={w:"Der Rucksack ersetzt die Hantel. Bei jeder Übung zeigt die App, wie viel Gewicht diese Woche ungefähr hinein soll. Der Wert steigt mit den Wochen automatisch.",s:["Rucksack einmal leer und einmal gepackt auf die Personenwaage stellen, oder dich mit und ohne Rucksack wiegen. Die Differenz ist das Gewicht.","Füllen mit Wasserflaschen (1 l = 1 kg), Büchern oder einer Tüte Reis (1 kg). Alles fest packen, damit nichts rutscht.","Hüft- und Brustgurt schließen, das Gewicht soll eng am Rücken liegen.","Fang am unteren Ende des Bereichs an. Schaffst du in allen Sätzen die obere Wiederholungszahl, beim nächsten Mal 1–2 kg mehr.","Schaffst du die untere Wiederholungszahl nicht sauber, nimm 1–2 kg raus. Die Wiederholungen sind wichtiger als die Zahl auf dem Rucksack."],t:"Bei Füßen erhöht und Deficit-Liegestützen ist weniger Gewicht nötig, weil die Übung schon schwerer ist. Das ist im Wert schon eingerechnet."};
 function infoBtn(k){return INFO[k]?`<button class="info" data-info="${esc(k)}" aria-label="Erklärung zu ${esc(k)}">i</button>`:""}
@@ -350,9 +350,9 @@ function dayPlan(d){
   const kraft=k=>{const key=(k==="A"&&w>=37)?"BANK":k;items.push({kind:"kraft",key})};
   const run=t=>{const r=runFor(w,t);if(r)items.push(Object.assign({kind:"run"},r))};
   switch(wd){
-    case 1:if(isTest(w))items.push({kind:"test"});kraft("A");if(isTest(w))items[items.length-1].skip=[0,3];items.push({kind:"swim"});break;
+    case 1:kraft("A");items.push({kind:"swim"});break;
     case 2:run("int");break;
-    case 3:items.push({kind:"rest",opt:true});break;
+    case 3:if(isTest(w))items.push({kind:"test"});else items.push({kind:"rest",opt:true});break;
     case 4:kraft("B");run("easy");break;
     case 5:if(isTest(w)){const P=paces();items.push({kind:"run",t:"5-km-Test",run:"test",d:"15 min einlaufen mit 3 kurzen Steigerungen, dann 5 km so schnell, wie du gleichmäßig durchhältst, 10 min auslaufen",pace:"gleichmäßig, am Limit"})}else if(is10k(w)){items.push({kind:"run",t:"10-km-Lauf auf Zeit",run:"test10",d:"15 min einlaufen, dann 10 km zügig und gleichmäßig auf Zeit, 10 min auslaufen",pace:"zügig, gleichmäßig"})}else run("tempo");break;
     case 6:kraft("C");items.push({kind:"swim"});break;
@@ -361,9 +361,10 @@ function dayPlan(d){
   return {w,dl:isDeload(w),ph:phase(w),items};
 }
 function titleOf(it){return it.kind==="kraft"?KRAFT[it.key].name:it.kind==="run"?it.t:it.kind==="swim"?"Schwimmen":it.kind==="test"?"Krafttest":"Ruhetag"}
-function laneType(d){const it=dayPlan(d).items;return it.some(i=>i.kind==="kraft")?"kraft":it.some(i=>i.kind==="run")?"lauf":"rest"}
+function laneType(d){const it=dayPlan(d).items;return it.some(i=>i.kind==="kraft")?"kraft":it.some(i=>i.kind==="run")?"lauf":it.some(i=>i.kind==="test")?"ink":"rest"}
 function laneLabel(d){
-  const it=dayPlan(d).items.filter(i=>i.kind!=="swim"&&i.kind!=="test");
+  const all=dayPlan(d).items;if(all.length===1&&all[0].kind==="test")return "Kraft&shy;test";
+  const it=all.filter(i=>i.kind!=="swim"&&i.kind!=="test");
   const lab=i=>i.kind==="kraft"?(i.key==="BANK"?"Bank&shy;drücken":"Kraft "+i.key):i.kind==="rest"?"Ruhe":({int:"Inter&shy;valle",tempo:"Tempo",long:"Langer Lauf",easy:"Locker",test:"5-km-Test",test10:"10 km Zeit"})[i.run];
   return it.length>1?lab(it[0])+"<span>+ Lauf</span>":lab(it[0]);
 }
@@ -460,7 +461,7 @@ function vHeute(){
   const d0=new Date();d0.setHours(0,0,0,0);const pre=d0<parse(S.start);
   const d=pre?parse(S.start):new Date(),dk=iso(d),p=dayPlan(d);
   const T=pre?PREVIEW:S;T.items=T.items||{};const st=T.items[dk]||{};
-  const titles=p.items.filter(i=>i.kind!=="swim"&&i.kind!=="test").map(titleOf).join(" + ");
+  const titles=(p.items.filter(i=>i.kind!=="swim"&&i.kind!=="test").map(titleOf).join(" + "))||"Krafttest";
   let h=`<div class="hero"><div class="date">${pre?"Dein Start: ":""}${fmtDate(d)}</div><h1>${esc(titles)}</h1>${pre?'<div class="prenote">Vorschau auf deinen ersten Tag. Du kannst das Abhaken hier ausprobieren, gespeichert wird aber erst ab dem Start.</div>':""}
     <div class="sub">Phase ${p.ph.name}${p.dl?", Entlastungswoche":""}</div>
     <div class="chips">${isTest(p.w)?'<span class="chip c t-ink" style="color:var(--on)">Testwoche</span>':""}${p.dl?'<span class="chip w">Halbe Sätze, weniger Laufen</span>':""}${p.items.some(i=>i.kind==="kraft")?`<span class="chip">${esc(p.ph.hint)}</span>`:""}</div></div>`;
@@ -480,7 +481,7 @@ function vHeute(){
     const cb=(u&&u!=="kraft")?checkBtn(u,titleOf(it)):"";
     if(it.kind==="kraft"){
       const k=KRAFT[it.key];
-      h+=`<div class="sec unit t-kraft" data-u="${u}"><h2><span class="dot"></span>${k.name}${cb}</h2><div class="lead">${k.tag}. Erst 8–10 min locker rudern. Jeder Satz endet 1–2 Wiederholungen vor dem Versagen. Ist eine Übung fertig, rechts abhaken. Sind alle abgehakt, ist die Einheit geschafft.${it.skip?" Heute ohne Liegestütze und Klimmzüge, die hast du im Krafttest schon gemacht.":""}</div><div class="group">${exItems(it,dk,p.dl,!pre,T)}</div></div>`;
+      h+=`<div class="sec unit t-kraft" data-u="${u}"><h2><span class="dot"></span>${k.name}${cb}</h2><div class="lead">${k.tag}. Erst 8–10 min locker rudern. Jeder Satz endet 1–2 Wiederholungen vor dem Versagen. Ist eine Übung fertig, rechts abhaken. Sind alle abgehakt, ist die Einheit geschafft.${it.skip?" ":""}</div><div class="group">${exItems(it,dk,p.dl,!pre,T)}</div></div>`;
     }else if(it.kind==="run"){
       h+=`<div class="sec unit t-lauf" data-u="${u}"><h2><span class="dot"></span>${esc(it.t)}${infoBtn(it.t)}${cb}</h2><div class="group"><div class="item"><div class="name">${esc(it.d)}</div>
         <div class="chips"><span class="chip c num">${esc(it.pace)}${/^test/.test(it.run)?"":" min/km"}</span>${it.note?`<span class="chip w">${esc(it.note)}</span>`:""}</div>
@@ -489,7 +490,7 @@ function vHeute(){
         ${pre?"":runForm("r",it.run)}</div></div>`;
     }else if(it.kind==="test"){
       const kg=ruckKg("Liegestütze mit Rucksack",p.w).replace("Ohne Rucksack","ohne Rucksack");
-      h+=`<div class="sec unit t-ink" data-u="${u}"><h2><span class="dot"></span>Krafttest${infoBtn("Krafttest")}${cb}</h2><div class="lead">Zuerst, gleich nach dem Aufwärmen, solange du frisch bist. Zähl ehrlich bis zur letzten sauberen Wiederholung, trag die Werte ein und hake ab.</div><div class="group"><div class="form"><div class="f">
+      h+=`<div class="sec unit t-ink" data-u="${u}"><h2><span class="dot"></span>Krafttest${infoBtn("Krafttest")}${cb}</h2><div class="lead">Dauert etwa 15 Minuten. Heute ist sonst frei, deine Muskeln sind seit Montag erholt. Zähl ehrlich bis zur letzten sauberen Wiederholung, trag die Werte ein und hake ab.</div><div class="group"><div class="form"><div class="f">
         <div><label for="tp">Liegestütze (${kg})</label><input id="tp" inputmode="numeric" placeholder="Wdh."></div>
         <div><label for="tk">Rucksack (kg)</label><input id="tk" inputmode="decimal" placeholder="0"></div>
         <div class="full"><label for="tq">Klimmzüge (Wdh.)</label><input id="tq" inputmode="numeric" placeholder="Wdh."></div></div></div></div></div>`;
@@ -589,7 +590,7 @@ const RULES=[
   ["Schmerzen","Wird ein Schmerz beim Laufen schlimmer oder ist er am nächsten Morgen noch da: drei Tage nicht laufen, stattdessen rudern. Geht er nicht weg, untersuchen lassen."]]],
  ["Tests","t-ink",[
   ["Wann","In Woche 1 und danach alle acht Wochen, jeweils direkt nach einer Entlastungswoche. Die App zeigt „Testwoche“ an."],
-  ["Montag","Zuerst der Test: Liegestütze mit dem aktuellen Rucksack-Gewicht und Klimmzüge, jeweils so viele saubere wie möglich. Danach Kraft A ohne Liegestütze und Klimmzüge."],
+  ["Mittwoch","Krafttest statt Ruhetag, etwa 15 Minuten: Liegestütze mit dem aktuellen Rucksack-Gewicht und Klimmzüge in der Schule, jeweils so viele saubere wie möglich. Sonst nichts."],
   ["Freitag","5-km-Test statt Tempolauf. Die Zeit passt deine Laufgeschwindigkeiten automatisch an."],
   ["10 km auf Zeit","In Woche 5 und danach alle acht Wochen läufst du freitags statt des Tempolaufs 10 km zügig auf Zeit."]]],
  ["Essen und Trinken","t-food",[
