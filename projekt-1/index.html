@@ -493,7 +493,8 @@ function vHeute(){
       h+=`<div class="sec unit t-ink" data-u="${u}"><h2><span class="dot"></span>Krafttest${infoBtn("Krafttest")}${cb}</h2><div class="lead">Dauert etwa 15 Minuten. Heute ist sonst frei, deine Muskeln sind seit Montag erholt. Zähl ehrlich bis zur letzten sauberen Wiederholung, trag die Werte ein und hake ab.</div><div class="group"><div class="form"><div class="f">
         <div><label for="tp">Liegestütze (${kg})</label><input id="tp" inputmode="numeric" placeholder="Wdh."></div>
         <div><label for="tk">Rucksack (kg)</label><input id="tk" inputmode="decimal" placeholder="0"></div>
-        <div class="full"><label for="tq">Klimmzüge (Wdh.)</label><input id="tq" inputmode="numeric" placeholder="Wdh."></div></div></div></div></div>`;
+        <div class="full"><label for="tq">Klimmzüge (Wdh.)</label><input id="tq" inputmode="numeric" placeholder="Wdh."></div></div>
+        <div class="btnrow"><button class="btn ghost" data-3d="push">Liegestütze in 3D</button><button class="btn ghost" data-3d="pull">Klimmzüge in 3D</button></div></div></div></div>`;
     }else if(it.kind==="swim"){
       h+=`<div class="sec unit" data-u="${u}"><div class="group side t-swim"><div class="item"><div class="top"><span class="name">Schwimmen am Abend <span class="opt">optional</span></span>${cb}</div><p>Zweimal pro Woche reicht, am besten Montag und Samstag. Zählt nicht zum Pflichtprogramm.</p></div></div></div>`;
     }else{
@@ -741,6 +742,7 @@ $("#nav").addEventListener("click",e=>{const b=e.target.closest("button");if(b){
 $("#app").addEventListener("click",e=>{
   const t=e.target.closest("button");if(!t)return;
   if(t.dataset.info){openInfo(t.dataset.info);return}
+  if(t.dataset["3d"]){const ex=t.dataset["3d"];if(window.open3D)window.open3D(ex);else{const sc=document.createElement("script");sc.src="anim3d.js";sc.onload=()=>window.open3D(ex);sc.onerror=()=>alert("Die 3D-Ansicht konnte nicht geladen werden. Prüf die Internetverbindung.");document.head.appendChild(sc)}return}
   if(t.dataset.theme){S.theme=t.dataset.theme;save();applyTheme();render();return}
   if(t.dataset.excheck!=null){
     const {pre,dk,T}=viewCtx(),i=+t.dataset.excheck,it=dayPlan(parse(dk)).items.find(x=>x.kind==="kraft");
