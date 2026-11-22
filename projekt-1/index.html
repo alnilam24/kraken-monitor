@@ -20,11 +20,16 @@
   --kraft:#2F54EB;--lauf:#FA541C;--swim:#0FA3A3;--food:#2E9E3A;
   --font:"SF Pro Display",system-ui,-apple-system,"Helvetica Neue",Helvetica,Arial,sans-serif;
 }
-@media (prefers-color-scheme:dark){:root{
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){
   --bg:#000000;--surface:#000000;--sunk:#161616;--ink:#FFFFFF;--mute:#9A9A9A;--line:#2A2A2A;--hair:#FFFFFF;
   --acc:#FFFFFF;--on:#000000;--acc2:#FFFFFF;--soft:#141414;
   --kraft:#6F8BFF;--lauf:#FF7A45;--swim:#36CFC9;--food:#6CCF5B;
 }}
+:root[data-theme=dark]{
+  --bg:#000000;--surface:#000000;--sunk:#161616;--ink:#FFFFFF;--mute:#9A9A9A;--line:#2A2A2A;--hair:#FFFFFF;
+  --acc:#FFFFFF;--on:#000000;--acc2:#FFFFFF;--soft:#141414;
+  --kraft:#6F8BFF;--lauf:#FF7A45;--swim:#36CFC9;--food:#6CCF5B;
+}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 var(--font);-webkit-font-smoothing:antialiased;letter-spacing:-.1px}
 button,input,select,textarea{font:inherit;color:inherit}
@@ -190,6 +195,9 @@ function load(){try{return JSON.parse(localStorage.getItem(KEY))||{}}catch(e){re
 let S=Object.assign(blank(),load());
 S.logs=Object.assign(blank().logs,S.logs||{});
 if(!S.start)S.start=DEFAULT_START;
+function applyTheme(){const t=S.theme||"auto",r=document.documentElement;if(t==="auto")r.removeAttribute("data-theme");else r.setAttribute("data-theme",t);
+  const dark=t==="dark"||(t==="auto"&&matchMedia("(prefers-color-scheme: dark)").matches);document.querySelectorAll('meta[name=theme-color]').forEach(m=>{m.setAttribute("content",dark?"#000000":"#FFFFFF");m.removeAttribute("media")})}
+applyTheme();
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
 
 /* ================= Datum & Zahlen ================= */
@@ -678,6 +686,8 @@ function vMehr(){
     <div class="full"><label for="t52">Letzte 5-km-Testzeit (mm:ss)</label><input id="t52" value="${esc(S.test5k||"")}" placeholder="z. B. 24:30" inputmode="numeric"></div></div>
     <div class="btnrow"><button class="btn" id="saveSet">Einstellungen speichern</button></div></div></div>
     <div class="lead" style="margin-top:10px">Die Testzeit bestimmt deine Paces. Ein 5-km-Test unter „Eintragen“ aktualisiert sie automatisch.</div></div>
+  <div class="sec"><h2>Darstellung</h2><div class="seg" style="margin-top:4px">${[["auto","Automatisch"],["light","Hell"],["dark","Dunkel"]].map(o=>`<button data-theme="${o[0]}" class="${(S.theme||"auto")===o[0]?"on":""}">${o[1]}</button>`).join("")}</div>
+    <div class="lead">„Automatisch“ folgt der Einstellung deines Geräts.</div></div>
   <div class="sec"><h2>Daten übertragen</h2><div class="lead">Deine Einträge liegen nur auf diesem Gerät. Um sie aufs iPad oder Handy zu bringen: hier exportieren, dort importieren.</div>
     <div class="group"><div class="form"><div class="btnrow" style="margin-top:0"><button class="btn ghost" id="exp">Exportieren</button><button class="btn ghost" id="imp">Importieren</button></div>
     <textarea id="io" class="hide" style="height:120px;margin-top:10px"></textarea><button class="btn hide" id="impGo" style="margin-top:10px">Import übernehmen</button></div></div></div>
@@ -704,6 +714,7 @@ $("#nav").addEventListener("click",e=>{const b=e.target.closest("button");if(b){
 $("#app").addEventListener("click",e=>{
   const t=e.target.closest("button");if(!t)return;
   if(t.dataset.info){openInfo(t.dataset.info);return}
+  if(t.dataset.theme){S.theme=t.dataset.theme;save();applyTheme();render();return}
   if(t.dataset.check){
     const u=t.dataset.check,dk=iso(new Date());
     if(u==="run"&&$("#rkm")&&$("#rkm").value){const r=readRun("r");if(!r)return;addRun(r,dk)}
