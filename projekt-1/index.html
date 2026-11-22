@@ -262,7 +262,7 @@ const INFO={
  "Einbeiniges Wadenheben an einer Stufe":{w:"Kräftigt Waden und Achillessehne. Das schützt beim Laufen vor typischen Überlastungen.",s:["Mit dem Fußballen eines Fußes auf eine Treppenstufe stellen, am Geländer festhalten.","Ferse langsam unter die Stufe absenken.","Auf die Zehenspitze hochdrücken, oben kurz halten.","Langsam wieder absenken."],t:"Das Absenken ruhig 2–3 Sekunden dauern lassen."},
  "Bankdrücken mit Langhantel":{w:"Die Übung, um die es am Ende geht: 50 kg × 10. Nur mit Partner zum Absichern oder in einem Rack mit Sicherheitsablagen.",s:["Auf die Bank legen, Augen unter der Stange, Füße fest auf dem Boden.","Stange etwas breiter als schulterbreit greifen, Schulterblätter zusammenziehen.","Stange kontrolliert zur unteren Brust senken, Ellenbogen 45–70° vom Körper.","Brust berühren und hochdrücken, bis die Arme gestreckt sind. Po bleibt auf der Bank."],t:"Die ersten Male mit einem Trainer oder jemandem, der die Technik kennt."},
  "Lockerer Lauf":{w:"Ruhiges Tempo, bei dem du dich in ganzen Sätzen unterhalten könntest. Das ist der größte und wichtigste Teil deines Lauftrainings.",s:["Bewusst langsamer laufen, als du denkst.","Auf der Watch soll der Puls ruhig bleiben, ungefähr unter 150–155."],t:"Locker ist nicht faul. Diese Läufe bauen die Ausdauer, die dich bei den harten Einheiten schnell macht."},
- "Langer Lauf":{w:"Dein längster Lauf der Woche, am Sonntag, komplett im lockeren Tempo. Er baut Grundlagenausdauer auf und macht 5 km später leichter.",s:["Das Tempo so wählen, dass du dich unterhalten könntest.","Die Dauer steht im Plan, nicht die Strecke.","Wasser trinken, wenn es über 60 Minuten geht."],t:"Nicht schneller werden, nur weil es sich gut anfühlt."},
+ "Langer Lauf":{w:"Dein längster Lauf der Woche, am Sonntag: deine 10 km, später etwas mehr, komplett im lockeren Tempo. Er baut Grundlagenausdauer auf und macht 5 km später leichter.",s:["Das Tempo so wählen, dass du dich unterhalten könntest.","Am Anfang 10 km, später bis 14 km. Die App zeigt dir auch, wie lange das ungefähr dauert.","Wasser trinken, wenn es über 60 Minuten geht."],t:"Nicht schneller werden, nur weil es sich gut anfühlt."},
  "Intervalle":{w:"Mehrere schnelle Abschnitte mit kurzen Trabpausen. Sie machen dich schneller und gewöhnen dich an das Zieltempo.",s:["10–15 min locker einlaufen.","Jeden Abschnitt gleichmäßig im angegebenen Tempo laufen, nicht den ersten zu schnell.","In der Pause langsam traben, nicht stehen bleiben.","10 min locker auslaufen."],t:"Auf der Apple Watch unter „Training“, „Eigenes Training“ anlegen, dann piept sie bei jedem Wechsel."},
  "Tempolauf":{w:"Ein längerer Abschnitt im angenehm harten Tempo. Hier lernst du, ein hohes Tempo lange zu halten.",s:["10–15 min locker einlaufen.","Den Tempoabschnitt gleichmäßig laufen: Sprechen geht nur noch in kurzen Worten.","10 min locker auslaufen."],t:"Am Ende solltest du das Gefühl haben, noch 5–10 Minuten weiterlaufen zu können."}
 };
@@ -304,7 +304,9 @@ function runFor(w,type){
     const v=[null,"15–20 min am Stück","20–25 min oder 3 × 10 min","25 min am Stück"][ph];
     return {t:"Tempolauf",run:"tempo",d:"10–15 min einlaufen, "+v+", 10 min auslaufen",pace:P.tempo};
   }
-  if(type==="long"){const v=["50–60","60–70","70–80","60–70"][ph];return {t:"Langer Lauf",run:"long",d:v+" min locker"+(dl?", diese Woche ca. 30 % kürzer":""),pace:P.easy}}
+  if(type==="long"){const km=dl?[7,7,8,7][ph]:[10,[10,11,12][Math.min(2,Math.floor((w-5)/4))],[12,13,14,14,14][Math.min(4,Math.floor((w-17)/4))],12][ph];
+    const t=toSec(S.test5k)||1500,p=t/5,lo=Math.round(km*(p+60)/60),hi=Math.round(km*(p+105)/60);
+    return {t:"Langer Lauf",run:"long",d:km+" km locker, etwa "+lo+"–"+hi+" min"+(dl?" (Entlastungswoche, kürzer als sonst)":""),pace:P.easy}}
   if(type==="easy"){if(ph===0)return null;return {t:"Lockerer Lauf",run:"easy",d:"30–40 min locker, am Ende 4–6 Steigerungen",pace:P.easy}}
 }
 function dayPlan(d){
@@ -463,15 +465,15 @@ function vPlan(){
       <tr><td>Intervall</td><td>Hart, schweres Atmen</td><td class="num">${P.interval}</td></tr>
       <tr><td>Ziel</td><td>5 km unter 23:00</td><td class="num">4:36</td></tr></table></div></div></div>
       <div class="sec"><h2>Phasen</h2><div class="group"><div class="item"><table>
-      <tr><th>Woche</th><th>Dienstag</th><th>Freitag</th><th>Sonntag</th></tr>
-      <tr><td>1–4</td><td>30 min locker + 6 × 20 s</td><td>locker</td><td>50–60 min</td></tr>
-      <tr><td>5–16</td><td>6–10 × 400 m</td><td>15–20 min Tempo</td><td>60–70 min</td></tr>
-      <tr><td>17–36</td><td>5–6 × 1000 m</td><td>20–25 min Tempo</td><td>70–80 min</td></tr>
-      <tr><td>37–52</td><td>3 × 1600 m</td><td>25 min Tempo</td><td>60–70 min</td></tr></table>
-      <p>Donnerstag ab Woche 5: 30–40 min locker nach Kraft B. Den langen Lauf um höchstens etwa 10 % pro Woche verlängern.</p></div></div>
+      <tr><th>Woche</th><th>Dienstag</th><th>Freitag</th><th>Sonntag, locker</th></tr>
+      <tr><td>1–4</td><td>30 min locker + 6 × 20 s</td><td>locker</td><td>10 km</td></tr>
+      <tr><td>5–16</td><td>6–10 × 400 m</td><td>15–20 min Tempo</td><td>10–12 km</td></tr>
+      <tr><td>17–36</td><td>5–6 × 1000 m</td><td>20–25 min Tempo</td><td>12–14 km</td></tr>
+      <tr><td>37–52</td><td>3 × 1600 m</td><td>25 min Tempo</td><td>12 km</td></tr></table>
+      <p>Donnerstag ab Woche 5: 30–40 min locker nach Kraft B. Der lange Lauf wird alle paar Wochen um 1 km länger, in Entlastungswochen sind es 7–8 km.</p></div></div>
       <div class="callout"><b>Schmerzregel:</b> Wird ein Schmerz beim Laufen schlimmer oder ist er am nächsten Morgen noch da, drei Tage nicht laufen und stattdessen rudern. Geht er nicht weg, lass ihn untersuchen.</div></div>`;
   }else if(planTab==="woche"){
-    const rows=[["Montag","Kraft A, abends Schwimmen","Klimmzüge in der Schule"],["Dienstag","Intervalle","Viel Zeit"],["Mittwoch","Ruhetag","Schwimmen optional"],["Donnerstag","Kraft B und lockerer Lauf","Viel Zeit"],["Freitag","Tempolauf",""],["Samstag","Kraft C, abends Schwimmen","Kraft am Vormittag"],["Sonntag","Langer lockerer Lauf","50–80 min ruhig"]];
+    const rows=[["Montag","Kraft A, abends Schwimmen","Klimmzüge in der Schule"],["Dienstag","Intervalle","Viel Zeit"],["Mittwoch","Ruhetag","Schwimmen optional"],["Donnerstag","Kraft B und lockerer Lauf","Viel Zeit"],["Freitag","Tempolauf",""],["Samstag","Kraft C, abends Schwimmen","Kraft am Vormittag"],["Sonntag","Langer lockerer Lauf","10–14 km ruhig"]];
     h+=`<div class="sec"><h2>Deine Woche</h2><div class="group">${rows.map(r=>`<div class="item"><div class="top"><span class="name">${r[0]}</span><span class="rx">${r[2]}</span></div><p style="color:var(--ink)">${r[1]}</p></div>`).join("")}</div>
       <div class="lead" style="margin-top:10px">Wird es zu viel, streich zuerst den Lauf am Donnerstag. Den Ruhetag nie.</div></div>
 `;
@@ -518,7 +520,7 @@ const RULES=[
  ["Laufen","t-lauf",[
   ["Locker heißt locker","Etwa 80 % deiner Laufzeit sind ruhig genug, dass du dich unterhalten könntest. Nur Dienstag und Freitag sind hart."],
   ["Mit der Watch","Intervalle als „Eigenes Training“ anlegen. Nach jedem Lauf Distanz, Zeit und Puls in der App eintragen."],
-  ["Steigern","Den langen Lauf höchstens um etwa 10 % pro Woche verlängern, also rund 5 Minuten."],
+  ["Steigern","Der lange Lauf startet bei 10 km und wird alle paar Wochen um 1 km länger, bis 14 km. Nie mehr als 1 km auf einmal."],
   ["Schlechtes Wetter","Bei Glatteis oder Gewitter: dieselbe Zeit locker auf der Rudermaschine. Regen und Kälte sind kein Grund."],
   ["Schmerzen","Wird ein Schmerz beim Laufen schlimmer oder ist er am nächsten Morgen noch da: drei Tage nicht laufen, stattdessen rudern. Geht er nicht weg, untersuchen lassen."]]],
  ["Tests","t-ink",[
