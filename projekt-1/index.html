@@ -49,7 +49,9 @@ nav button.on{color:var(--acc)}
 .lanes{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin:18px 0 6px}
 .lane{border-radius:12px;padding:8px 0 9px;text-align:center;background:var(--surface);border:1px solid var(--line)}
 .lane .d{font-size:12px;color:var(--mute);font-weight:600}
-.lane .k{font-size:13px;font-weight:700;margin-top:2px}
+.lane .k{font-size:11.5px;font-weight:700;margin-top:2px;line-height:1.2;padding:0 2px;hyphens:manual}
+.lane .k span{display:block;font-weight:600;color:var(--mute)}
+.lane.done .k span{color:rgba(255,255,255,.85)}
 .lane.today{border-color:var(--acc);box-shadow:inset 0 0 0 1px var(--acc)}
 .lane.done{background:var(--acc);border-color:var(--acc);color:#fff}
 .lane.done .d{color:rgba(255,255,255,.85)}
@@ -124,6 +126,19 @@ td+td,th+th{padding-left:10px}
 .x{border:0;background:var(--sunk);width:32px;height:32px;border-radius:10px;color:var(--mute);font-size:15px;flex:none}
 ol,ul{margin:6px 0 0;padding-left:20px}li{margin:5px 0}
 .hide{display:none}
+.info{flex:none;width:22px;height:22px;border-radius:50%;border:1.5px solid var(--line);background:none;color:var(--mute);font:700 12px/1 Georgia,serif;font-style:italic;padding:0;margin-left:6px;vertical-align:2px}
+.info:active{background:var(--sunk)}
+.sheet-bg{position:fixed;inset:0;z-index:20;background:rgba(10,15,20,.45);display:flex;align-items:flex-end;justify-content:center;opacity:0;transition:opacity .2s}
+.sheet-bg.open{opacity:1}
+.sheet{background:var(--surface);width:100%;max-width:560px;max-height:82vh;overflow:auto;border-radius:22px 22px 0 0;padding:10px 20px calc(24px + env(safe-area-inset-bottom));transform:translateY(24px);transition:transform .22s}
+.sheet-bg.open .sheet{transform:none}
+.sheet .grab{width:38px;height:5px;border-radius:3px;background:var(--line);margin:0 auto 14px}
+.sheet h3{margin:0 0 6px;font-size:22px;letter-spacing:-.4px}
+.sheet .what{color:var(--mute);margin:0 0 14px}
+.sheet h4{margin:16px 0 4px;font-size:15px}
+.sheet ol,.sheet ul{margin:4px 0 0}
+.sheet .close{margin-top:20px}
+@media (min-width:600px){.sheet-bg{align-items:center}.sheet{border-radius:22px}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
@@ -207,6 +222,40 @@ const KRAFT={
   ["Bulgarische Split Squats mit Rucksack",3,"8–12 je Bein","90 s"],
   ["Klimmzüge mit Rucksack (Schule)",3,"5–8","2 min"]]}
 };
+const INFO={
+ "Liegestütze, Füße erhöht, mit Rucksack":{w:"Liegestütze mit den Füßen auf einem Stuhl oder Bett. Dadurch liegt mehr Gewicht auf Brust, Schultern und Trizeps.",s:["Rucksack fest auf den Rücken schnallen, Hüftgurt zu.","Hände etwas breiter als schulterbreit auf den Boden, Füße auf den Stuhl.","Körper bildet eine gerade Linie, Bauch und Po anspannen.","Brust bis knapp über den Boden absenken, Ellenbogen etwa 45° vom Körper.","Kräftig hochdrücken, oben Arme fast strecken."],t:"Hängt die Hüfte durch, ist der Rucksack zu schwer."},
+ "Dips zwischen zwei Stühlen":{w:"Drückübung für Trizeps, untere Brust und Schultern. Das ist die Heimversion von Barren-Dips.",s:["Zwei stabile Stühle Lehne an Lehne, etwas mehr als schulterbreit auseinander, am besten an eine Wand.","Hände auf die Lehnen, Arme gestreckt, Beine angewinkelt in der Luft.","Langsam absenken, bis die Oberarme etwa waagerecht sind.","Oberkörper leicht nach vorn neigen, dann hochdrücken."],t:"Vorher prüfen, dass nichts kippt. Zieht es vorne in der Schulter, nicht so tief gehen."},
+ "Dips":{w:"Drückübung für Trizeps, untere Brust und Schultern, zwischen zwei stabilen Stühlen oder an einem Barren.",s:["Hände auf die Stützen, Arme gestreckt, Beine angewinkelt.","Absenken, bis die Oberarme etwa waagerecht sind.","Oberkörper leicht nach vorn, dann kräftig hochdrücken."],t:"Stühle an die Wand stellen, damit nichts wegrutscht."},
+ "Bulgarische Split Squats mit Rucksack":{w:"Einbeinige Kniebeuge mit dem hinteren Fuß auf einem Stuhl. Trainiert Oberschenkel und Po, ganz ohne Hantel.",s:["Mit dem Rücken zum Stuhl stellen, einen Fußrücken hinten auf die Sitzfläche legen.","Vorderer Fuß so weit vorn, dass das Knie beim Absenken über dem Fuß bleibt.","Senkrecht absenken, bis der vordere Oberschenkel etwa waagerecht ist.","Über die Ferse des vorderen Fußes hochdrücken. Alle Wiederholungen, dann Beinwechsel."],t:"Wackelt es, halt dich anfangs leicht an einer Wand fest."},
+ "Klimmzüge mit Rucksack (Schule)":{w:"Klimmzüge im Ristgriff (Handrücken zu dir) mit etwas Gewicht im Rucksack. Für Rücken und Bizeps.",s:["Rucksack auf, an die Stange hängen, Hände etwas breiter als schulterbreit.","Schultern nach unten ziehen, dann hochziehen, bis das Kinn über der Stange ist.","Kontrolliert ganz nach unten ablassen."],t:"Kein Schwung aus den Beinen. Wenn kein Rucksack geht: oben 1 s halten und 3 s ablassen."},
+ "Hollow Hold":{w:"Statische Rumpfübung aus dem Turnen. Stärkt die ganze Bauchmuskulatur.",s:["Auf den Rücken legen, Arme lang über den Kopf.","Lendenwirbelsäule fest auf den Boden drücken.","Schultern und gestreckte Beine ein paar Zentimeter anheben, sodass der Körper eine flache Banane bildet.","Position halten und ruhig weiteratmen."],t:"Hebt sich der untere Rücken, Knie anwinkeln oder Arme neben den Körper legen."},
+ "Deficit-Liegestütze zwischen Stühlen":{w:"Liegestütze mit den Händen auf zwei Stühlen oder Bücherstapeln. Du kommst tiefer als der Boden und dehnst die Brust stärker, das bringt mehr Muskelreiz.",s:["Zwei gleich hohe, stabile Erhöhungen schulterbreit hinstellen.","Hände darauf, Körper gerade, Rucksack auf dem Rücken.","Brust langsam zwischen die Hände absenken, so tief es angenehm geht.","Hochdrücken."],t:"Tiefe langsam steigern, die Schultern brauchen etwas Gewöhnung."},
+ "Pike-Liegestütze":{w:"Liegestütze mit hochgestrecktem Po. Das verlagert die Arbeit auf die Schultern, ähnlich wie Schulterdrücken.",s:["Aus dem Liegestütz die Hüfte hochschieben, bis der Körper ein umgedrehtes V bildet.","Hände schulterbreit, Kopf zwischen den Armen.","Ellenbogen beugen und den Kopf vor die Hände Richtung Boden absenken.","Zurück hochdrücken."],t:"Zu leicht? Füße auf einen Stuhl stellen."},
+ "Einbeiniges rumänisches Kreuzheben":{w:"Vorbeugen auf einem Bein mit fast gestrecktem Knie. Trainiert hintere Oberschenkel, Po und Gleichgewicht.",s:["Auf einem Bein stehen, Knie leicht gebeugt, Rucksack in der Gegenhand.","Hüfte nach hinten schieben und den Oberkörper nach vorn senken, das freie Bein geht gestreckt nach hinten.","Rücken bleibt gerade, bis du hinten im Oberschenkel Zug spürst.","Über den Po wieder aufrichten."],t:"Langsam bewegen, Gleichgewicht ist Teil der Übung."},
+ "Tisch-Rudern":{w:"Umgekehrter Liegestütz unter einem stabilen Tisch. Die Gegenbewegung zu Liegestützen für Rücken und Bizeps.",s:["Unter einen massiven Tisch legen und die Tischkante schulterbreit greifen.","Körper gerade wie ein Brett, Fersen am Boden.","Brust zur Tischkante ziehen, Schulterblätter zusammen.","Langsam ablassen."],t:"Erst prüfen, dass der Tisch nicht kippen kann. Je flacher du liegst, desto schwerer."},
+ "Nordic Curls, langsam ablassen":{w:"Eine der wirksamsten Übungen für die hinteren Oberschenkel. Sie senkt nachweislich das Risiko für Zerrungen.",s:["Auf ein Kissen knien, Fersen unter einem Sofa oder Bett einklemmen (oder jemand hält sie).","Körper von Knie bis Kopf gerade, Hüfte gestreckt.","So langsam wie möglich nach vorn kippen und mit den Oberschenkeln bremsen.","Mit den Händen auffangen und mit leichtem Abdrücken zurück in die Ausgangsposition."],t:"Am Anfang schafft fast niemand den ganzen Weg. Jede Sekunde Bremsen zählt."},
+ "Liegestütze mit Rucksack":{w:"Normale Liegestütze mit Zusatzgewicht. Die wichtigste Übung, um dich aufs Bankdrücken vorzubereiten.",s:["Rucksack fest auf, Hände etwas breiter als schulterbreit.","Körper gerade, Bauch und Po angespannt.","Brust bis knapp über den Boden, Ellenbogen etwa 45° vom Körper.","Hochdrücken."],t:"Volle Bewegung zählt mehr als viele halbe Wiederholungen."},
+ "Klimmzüge am Reck oder Tisch-Rudern":{w:"Samstags kommst du nicht an die Stange der Schule. Nimm ein Reck auf dem Spielplatz oder mach stattdessen Tisch-Rudern.",s:["Reck: Ristgriff, kontrolliert hoch bis zum Kinn über der Stange und ganz ablassen.","Ohne Reck: Tisch-Rudern, 3 Sätze bis kurz vor Schluss."],t:"Max. minus 2 heißt: 2 Wiederholungen weniger, als du maximal könntest."},
+ "Ausfallschritte gehend mit Rucksack":{w:"Große Schritte nach vorn mit tiefem Absenken. Trainiert Beine und Po und schult die Stabilität beim Laufen.",s:["Rucksack auf, aufrecht stehen.","Großen Schritt nach vorn und das hintere Knie fast bis zum Boden senken.","Mit dem vorderen Bein hochdrücken und direkt den nächsten Schritt mit dem anderen Bein machen.","Im Flur oder Garten hin und zurück gehen."],t:"Oberkörper aufrecht, vorderes Knie zeigt in Richtung Fuß."},
+ "Liegendes Beinheben":{w:"Bauchübung für den unteren Bauch. Sie ersetzt das hängende Knieheben, wenn keine Stange da ist.",s:["Auf den Rücken legen, Hände neben dem Po oder darunter.","Unteren Rücken auf den Boden drücken.","Gestreckte oder leicht gebeugte Beine bis senkrecht anheben.","Langsam absenken, ohne dass die Fersen den Boden berühren."],t:"Hohlkreuz vermeiden. Lieber die Knie stärker beugen."},
+ "Einbeiniges Wadenheben an einer Stufe":{w:"Kräftigt Waden und Achillessehne. Das schützt beim Laufen vor typischen Überlastungen.",s:["Mit dem Fußballen eines Fußes auf eine Treppenstufe stellen, am Geländer festhalten.","Ferse langsam unter die Stufe absenken.","Auf die Zehenspitze hochdrücken, oben kurz halten.","Langsam wieder absenken."],t:"Das Absenken ruhig 2–3 Sekunden dauern lassen."},
+ "Bankdrücken mit Langhantel":{w:"Die Übung, um die es am Ende geht: 50 kg × 10. Nur mit Partner zum Absichern oder in einem Rack mit Sicherheitsablagen.",s:["Auf die Bank legen, Augen unter der Stange, Füße fest auf dem Boden.","Stange etwas breiter als schulterbreit greifen, Schulterblätter zusammenziehen.","Stange kontrolliert zur unteren Brust senken, Ellenbogen 45–70° vom Körper.","Brust berühren und hochdrücken, bis die Arme gestreckt sind. Po bleibt auf der Bank."],t:"Die ersten Male mit einem Trainer oder jemandem, der die Technik kennt."},
+ "Lockerer Lauf":{w:"Ruhiges Tempo, bei dem du dich in ganzen Sätzen unterhalten könntest. Das ist der größte und wichtigste Teil deines Lauftrainings.",s:["Bewusst langsamer laufen, als du denkst.","Auf der Watch soll der Puls ruhig bleiben, ungefähr unter 150–155."],t:"Locker ist nicht faul. Diese Läufe bauen die Ausdauer, die dich bei den harten Einheiten schnell macht."},
+ "Langer Lauf":{w:"Dein längster Lauf der Woche, am Sonntag, komplett im lockeren Tempo. Er baut Grundlagenausdauer auf und macht 5 km später leichter.",s:["Das Tempo so wählen, dass du dich unterhalten könntest.","Die Dauer steht im Plan, nicht die Strecke.","Wasser trinken, wenn es über 60 Minuten geht."],t:"Nicht schneller werden, nur weil es sich gut anfühlt."},
+ "Intervalle":{w:"Mehrere schnelle Abschnitte mit kurzen Trabpausen. Sie machen dich schneller und gewöhnen dich an das Zieltempo.",s:["10–15 min locker einlaufen.","Jeden Abschnitt gleichmäßig im angegebenen Tempo laufen, nicht den ersten zu schnell.","In der Pause langsam traben, nicht stehen bleiben.","10 min locker auslaufen."],t:"Auf der Apple Watch unter „Training“, „Eigenes Training“ anlegen, dann piept sie bei jedem Wechsel."},
+ "Tempolauf":{w:"Ein längerer Abschnitt im angenehm harten Tempo. Hier lernst du, ein hohes Tempo lange zu halten.",s:["10–15 min locker einlaufen.","Den Tempoabschnitt gleichmäßig laufen: Sprechen geht nur noch in kurzen Worten.","10 min locker auslaufen."],t:"Am Ende solltest du das Gefühl haben, noch 5–10 Minuten weiterlaufen zu können."}
+};
+function infoBtn(k){return INFO[k]?`<button class="info" data-info="${esc(k)}" aria-label="Erklärung zu ${esc(k)}">i</button>`:""}
+function openInfo(k){
+  const i=INFO[k];if(!i)return;
+  const bg=document.createElement("div");bg.className="sheet-bg";
+  bg.innerHTML=`<div class="sheet" role="dialog" aria-modal="true" aria-label="${esc(k)}"><div class="grab"></div><h3>${esc(k)}</h3><p class="what">${esc(i.w)}</p><h4>So geht's</h4><ol>${i.s.map(x=>`<li>${esc(x)}</li>`).join("")}</ol>${i.t?`<h4>Tipp</h4><p style="margin:4px 0 0">${esc(i.t)}</p>`:""}<button class="btn ghost close">Schließen</button></div>`;
+  const close=()=>{bg.classList.remove("open");setTimeout(()=>bg.remove(),200);document.removeEventListener("keydown",esc_)};
+  const esc_=e=>{if(e.key==="Escape")close()};
+  bg.addEventListener("click",e=>{if(e.target===bg||e.target.closest(".close"))close()});
+  document.addEventListener("keydown",esc_);
+  document.body.appendChild(bg);requestAnimationFrame(()=>bg.classList.add("open"));bg.querySelector(".close").focus();
+}
 function runFor(w,type){
   const P=paces(),dl=isDeload(w),ph=w<=4?0:w<=16?1:w<=36?2:3;
   if(type==="int"){
@@ -240,7 +289,8 @@ function dayPlan(d){
 function titleOf(it){return it.kind==="kraft"?KRAFT[it.key].name:it.kind==="run"?it.t:it.kind==="swim"?"Schwimmen":"Ruhetag"}
 function laneLabel(d){
   const it=dayPlan(d).items.filter(i=>i.kind!=="swim");
-  return it.map(i=>i.kind==="kraft"?(i.key==="BANK"?"Bank":i.key):i.kind==="rest"?"Ruhe":({int:"Int",tempo:"Tempo",long:"Lang",easy:"Lauf"})[i.run]).join("+");
+  const lab=i=>i.kind==="kraft"?(i.key==="BANK"?"Bank&shy;drücken":"Kraft "+i.key):i.kind==="rest"?"Ruhe":({int:"Inter&shy;valle",tempo:"Tempo",long:"Langer Lauf",easy:"Locker"})[i.run];
+  return it.length>1?lab(it[0])+"<span>+ Lauf</span>":lab(it[0]);
 }
 const trainingDays=d=>{const m=mondayOf(d);let n=0;for(let i=0;i<7;i++){const x=new Date(m);x.setDate(m.getDate()+i);if(dayPlan(x).items.some(t=>t.kind!=="rest"))n++}return n};
 
@@ -297,7 +347,7 @@ function exItems(key,dk,dl){
     const n=dl?Math.max(1,Math.ceil(e[1]/2)):e[1];
     const reps=(key==="A"&&i===0&&ph.a)?ph.a:e[2];
     const b=Array.from({length:n},(_,j)=>`<button class="set ${st[i+"-"+j]?"done":""}" data-set="${dk}|${i}-${j}" aria-label="Satz ${j+1}">${j+1}</button>`).join("");
-    return `<div class="item"><div class="top"><span class="name">${esc(e[0])}</span><span class="rx num">${n} × ${esc(reps)}</span></div><p>Pause ${e[3]}</p><div class="sets">${b}</div></div>`;
+    return `<div class="item"><div class="top"><span class="name">${esc(e[0])}${infoBtn(e[0])}</span><span class="rx num">${n} × ${esc(reps)}</span></div><p>Pause ${e[3]}</p><div class="sets">${b}</div></div>`;
   }).join("");
 }
 function runForm(prefix,type){
@@ -326,7 +376,7 @@ function vHeute(){
       const k=KRAFT[it.key];
       h+=`<div class="sec"><h2>${k.name}</h2><div class="lead">${k.tag}. Erst 8–10 min locker rudern. Jeder Satz endet 1–2 Wiederholungen vor dem Versagen.</div><div class="group">${exItems(it.key,dk,p.dl)}</div></div>`;
     }else if(it.kind==="run"){
-      h+=`<div class="sec"><h2>${esc(it.t)}</h2><div class="group"><div class="item"><div class="name">${esc(it.d)}</div>
+      h+=`<div class="sec"><h2>${esc(it.t)}${infoBtn(it.t)}</h2><div class="group"><div class="item"><div class="name">${esc(it.d)}</div>
         <div class="chips"><span class="chip b num">${esc(it.pace)} min/km</span>${it.note?`<span class="chip w">${esc(it.note)}</span>`:""}</div>
         ${paces().known?"":'<p>Die Paces gehen von 25:00 auf 5 km aus. Trag deine Testzeit unter „Mehr“ ein, dann passen sie sich an.</p>'}</div>
         ${pre?"":runForm("r",it.run)}</div></div>`;
@@ -348,7 +398,7 @@ function vPlan(){
   let h=`<div class="hero"><h1>Plan</h1></div><div class="seg">${tabs.map(t=>`<button data-pt="${t[0]}" class="${planTab===t[0]?"on":""}">${t[1]}</button>`).join("")}</div>`;
   if(planTab==="kraft"){
     for(const key of ["A","B","C"]){const k=KRAFT[key];
-      h+=`<div class="sec"><h2>${k.name}</h2><div class="lead">${dayName(key)}, ${k.tag}</div><div class="group">${k.ex.map(e=>`<div class="item"><div class="top"><span class="name">${esc(e[0])}</span><span class="rx num">${e[1]} × ${esc(e[2])}</span></div><p>Pause ${e[3]}</p></div>`).join("")}</div></div>`}
+      h+=`<div class="sec"><h2>${k.name}</h2><div class="lead">${dayName(key)}, ${k.tag}</div><div class="group">${k.ex.map(e=>`<div class="item"><div class="top"><span class="name">${esc(e[0])}${infoBtn(e[0])}</span><span class="rx num">${e[1]} × ${esc(e[2])}</span></div><p>Pause ${e[3]}</p></div>`).join("")}</div></div>`}
     h+=`<div class="sec"><h2>So wird es schwerer</h2><div class="group"><div class="item"><p style="margin:0;color:var(--ink)">Schaffst du in allen Sätzen die obere Wiederholungszahl mit 1–2 Wiederholungen Reserve, packst du 1–2 kg mehr in den Rucksack. Ein Liter Wasser wiegt 1 kg.</p><p>Geht der Rucksack nicht schwerer, nimm die nächste Stufe: normale Liegestütze, Füße erhöht, Deficit, Archer.</p></div></div>
       <div class="callout"><b>Bankdrücken:</b> In den letzten 3–4 Monaten brauchst du einmal pro Woche eine echte Langhantel, zum Beispiel im Kraftraum der Schule, im Verein oder im Studio. Faustregel: 15 saubere Liegestütze mit etwa 20 kg im Rucksack bedeuten, dass 50 kg × 10 in Reichweite sind.</div></div>`;
   }else if(planTab==="lauf"){
@@ -368,7 +418,7 @@ function vPlan(){
       <p>Donnerstag ab Woche 5: 30–40 min locker nach Kraft B. Den langen Lauf um höchstens etwa 10 % pro Woche verlängern.</p></div></div>
       <div class="callout"><b>Schmerzregel:</b> Wird ein Schmerz beim Laufen schlimmer oder ist er am nächsten Morgen noch da, drei Tage nicht laufen und stattdessen rudern. Geht er nicht weg, lass ihn untersuchen.</div></div>`;
   }else if(planTab==="woche"){
-    const rows=[["Montag","Kraft A, abends Schwimmen","Klimmzüge in der Schule"],["Dienstag","Intervalle","Viel Zeit"],["Mittwoch","Ruhetag","Schwimmen optional"],["Donnerstag","Kraft B und lockerer Lauf","Viel Zeit"],["Freitag","Tempolauf",""],["Samstag","Kraft C, abends Schwimmen","Kraft am Vormittag"],["Sonntag","Langer Lauf","Bewusst langsam"]];
+    const rows=[["Montag","Kraft A, abends Schwimmen","Klimmzüge in der Schule"],["Dienstag","Intervalle","Viel Zeit"],["Mittwoch","Ruhetag","Schwimmen optional"],["Donnerstag","Kraft B und lockerer Lauf","Viel Zeit"],["Freitag","Tempolauf",""],["Samstag","Kraft C, abends Schwimmen","Kraft am Vormittag"],["Sonntag","Langer lockerer Lauf","50–80 min ruhig"]];
     h+=`<div class="sec"><h2>Deine Woche</h2><div class="group">${rows.map(r=>`<div class="item"><div class="top"><span class="name">${r[0]}</span><span class="rx">${r[2]}</span></div><p style="color:var(--ink)">${r[1]}</p></div>`).join("")}</div>
       <div class="lead" style="margin-top:10px">Wird es zu viel, streich zuerst den Lauf am Donnerstag. Den Ruhetag nie.</div></div>
       <div class="sec"><h2>Sechs Regeln</h2><div class="group"><div class="item"><ol>
@@ -532,6 +582,7 @@ function addRun(r,date){
 $("#nav").addEventListener("click",e=>{const b=e.target.closest("button");if(b){view=b.dataset.v;render();window.scrollTo(0,0)}});
 $("#app").addEventListener("click",e=>{
   const t=e.target.closest("button");if(!t)return;
+  if(t.dataset.info){openInfo(t.dataset.info);return}
   if(t.dataset.set){const [dk,id]=t.dataset.set.split("|");S.sets[dk]=S.sets[dk]||{};S.sets[dk][id]=!S.sets[dk][id];save();t.classList.toggle("done");return}
   if(t.id==="dayDone"){
     const dk=iso(new Date());
