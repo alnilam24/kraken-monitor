@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Projekt 1</title>
+<meta name="theme-color" content="#0e1116">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Projekt 1">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-192.png">
+<style>
+:root{
+  --bg:#0e1116;--card:#171b22;--card2:#1f242d;--line:#2a313c;--text:#e8ecf1;--mute:#9aa4b2;
+  --acc:#4cc2ff;--ok:#3ecf8e;--warn:#f5b041;--bad:#ff6b6b;--r:14px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--text);font:16px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+header{position:sticky;top:0;z-index:5;background:rgba(14,17,22,.92);backdrop-filter:blur(10px);
+  padding:calc(env(safe-area-inset-top) + 10px) 16px 10px;border-bottom:1px solid var(--line)}
+header h1{margin:0;font-size:20px;letter-spacing:.3px}
+header .sub{color:var(--mute);font-size:13px}
+main{padding:14px 14px calc(90px + env(safe-area-inset-bottom));max-width:760px;margin:0 auto}
+nav{position:fixed;bottom:0;left:0;right:0;z-index:5;display:flex;background:rgba(23,27,34,.96);backdrop-filter:blur(10px);
+  border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
+nav button{flex:1;background:none;border:0;color:var(--mute);padding:9px 2px 8px;font-size:11px;display:flex;flex-direction:column;align-items:center;gap:2px}
+nav button .i{font-size:20px;line-height:1}
+nav button.on{color:var(--acc)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:14px;margin-bottom:12px}
+.card h2{margin:0 0 8px;font-size:17px}
+.card h3{margin:12px 0 6px;font-size:15px;color:var(--acc)}
+.mute{color:var(--mute);font-size:14px}
+.pill{display:inline-block;padding:2px 9px;border-radius:99px;font-size:12px;background:var(--card2);border:1px solid var(--line);margin:2px 4px 2px 0}
+.pill.acc{color:var(--acc);border-color:#2b5f7d}.pill.warn{color:var(--warn);border-color:#6d5320}.pill.ok{color:var(--ok);border-color:#24624a}
+.ex{border-top:1px solid var(--line);padding:10px 0}
+.ex:first-of-type{border-top:0}
+.ex .t{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.ex .n{font-weight:600}
+.ex .d{color:var(--mute);font-size:13px;white-space:nowrap}
+.sets{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.set{width:42px;height:42px;border-radius:10px;border:1px solid var(--line);background:var(--card2);color:var(--mute);font-weight:600;font-size:15px}
+.set.done{background:var(--ok);border-color:var(--ok);color:#06281a}
+.btn{background:var(--acc);color:#04131c;border:0;border-radius:10px;padding:11px 14px;font-weight:600;font-size:15px}
+.btn.sec{background:var(--card2);color:var(--text);border:1px solid var(--line)}
+.btn.full{width:100%}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+input,select{background:var(--card2);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:10px;font-size:16px;width:100%}
+label{display:block;font-size:13px;color:var(--mute);margin:8px 0 4px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{text-align:left;padding:7px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--mute);font-weight:500}
+.big{font-size:30px;font-weight:700}
+.week{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:6px}
+.wd{background:var(--card2);border:1px solid var(--line);border-radius:9px;padding:6px 2px;text-align:center;font-size:11px;color:var(--mute)}
+.wd b{display:block;color:var(--text);font-size:13px}
+.wd.today{border-color:var(--acc)}
+.wd.done{background:#163a2c;border-color:#24624a}
+.chart{width:100%;height:170px;display:block}
+.tabs{display:flex;gap:6px;overflow-x:auto;margin-bottom:10px}
+.tabs button{flex:none;background:var(--card2);border:1px solid var(--line);color:var(--mute);border-radius:99px;padding:7px 13px;font-size:14px}
+.tabs button.on{color:var(--acc);border-color:var(--acc)}
+ol,ul{padding-left:20px;margin:6px 0}li{margin:4px 0}
+.note{border-left:3px solid var(--warn);padding:6px 10px;background:#211c12;border-radius:6px;font-size:14px;margin-top:8px}
+.hide{display:none}
+</style>
+</head>
+<body>
+<header><h1>Projekt 1</h1><div class="sub" id="hdr">&nbsp;</div></header>
+<main id="app"></main>
+<nav id="nav">
+  <button data-v="heute" class="on"><span class="i">◉</span>Heute</button>
+  <button data-v="plan"><span class="i">☰</span>Plan</button>
+  <button data-v="fort"><span class="i">↗</span>Fortschritt</button>
+  <button data-v="essen"><span class="i">◍</span>Essen</button>
+  <button data-v="mehr"><span class="i">⚙</span>Mehr</button>
+</nav>
+
+<script>
+"use strict";
+/* ---------- Speicher ---------- */
+const KEY="projekt1.v1";
+function load(){try{return JSON.parse(localStorage.getItem(KEY))||{}}catch(e){return {}}}
+let S=Object.assign({start:null,test5k:null,logs:{weight:[],run5k:[],push:[],pull:[]},done:{},sets:{}},load());
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+
+/* ---------- Datum ---------- */
+const DAYS=["So","Mo","Di","Mi","Do","Fr","Sa"];
+function iso(d){const z=new Date(d.getTime()-d.getTimezoneOffset()*6e4);return z.toISOString().slice(0,10)}
+function parse(s){const [y,m,d]=s.split("-").map(Number);return new Date(y,m-1,d)}
+function mondayOf(d){const x=new Date(d);const k=(x.getDay()+6)%7;x.setDate(x.getDate()-k);x.setHours(0,0,0,0);return x}
+function weekNo(d){if(!S.start)return 1;const w=Math.floor((mondayOf(d)-mondayOf(parse(S.start)))/(7*864e5))+1;return Math.max(1,w)}
+function nextMonday(){const d=new Date();d.setHours(0,0,0,0);const k=(8-d.getDay())%7;d.setDate(d.getDate()+k);return d}
+function fmtDate(d){return d.toLocaleDateString("de-DE",{weekday:"long",day:"numeric",month:"long"})}
+
+/* ---------- Pace ---------- */
+function toSec(s){if(!s)return null;const p=String(s).trim().split(":").map(Number);if(p.some(isNaN))return null;return p.length===2?p[0]*60+p[1]:p.length===3?p[0]*3600+p[1]*60+p[2]:null}
+function mmss(sec){sec=Math.round(sec);return Math.floor(sec/60)+":"+String(sec%60).padStart(2,"0")}
+function paces(){
+  const t=toSec(S.test5k)||1500; const p=t/5;
+  return {base:p,easy:mmss(p+60)+"–"+mmss(p+105),tempo:mmss(p+10)+"–"+mmss(p+20),interval:mmss(p-10)+"–"+mmss(p),goal:"4:36 (Puffer 4:15–4:20)",known:!!toSec(S.test5k)};
+}
+
+/* ---------- Plan-Logik ---------- */
+function isDeload(w){return w%4===0}
+function strengthPhase(w){
+  if(w<=4)return {name:"Technik",ruck:"ohne Rucksack, saubere Technik",aReps:null};
+  if(w<=20)return {name:"Aufbau",ruck:"Rucksack schrittweise bis ca. 10–12 kg",aReps:null};
+  if(w<=36)return {name:"Kraft",ruck:"Rucksack 15–20 kg+, bei A nur 5–8 Wdh.",aReps:"5–8"};
+  return {name:"Spezifisch",ruck:"1× pro Woche echtes Bankdrücken mit Langhantel statt Einheit A",aReps:"5–8"};
+}
+const KRAFT={
+ A:{name:"Kraft A – schwer",ex:[
+  ["Liegestütze, Füße erhöht, mit Rucksack",4,"6–12","2 min"],
+  ["Dips zwischen zwei Stühlen (später mit Rucksack)",3,"6–12","2 min"],
+  ["Bulgarische Split Squats mit Rucksack",3,"8–12/Bein","90 s"],
+  ["Klimmzüge mit Rucksack (Schule)",3,"5–8","2 min"],
+  ["Hollow Hold",3,"30–45 s","60 s"]]},
+ B:{name:"Kraft B – Aufbau",ex:[
+  ["Deficit-Liegestütze zwischen Stühlen mit Rucksack",3,"8–15","90 s"],
+  ["Pike-Liegestütze (Schultern)",3,"6–12","90 s"],
+  ["Einbeiniges rumänisches Kreuzheben mit Rucksack",3,"10/Bein","90 s"],
+  ["Tisch-Rudern",3,"10–15","90 s"],
+  ["Nordic Curls (langsam ablassen)",3,"3–6","2 min"]]},
+ C:{name:"Kraft C – Volumen",ex:[
+  ["Liegestütze mit Rucksack",3,"12–20","90 s"],
+  ["Dips",3,"Max − 2","90 s"],
+  ["Klimmzüge Ristgriff (Schule)",3,"Max − 2","2 min"],
+  ["Ausfallschritte gehend mit Rucksack",3,"12/Bein","90 s"],
+  ["Hängendes Knieheben (Schule)",3,"10–15","60 s"],
+  ["Einbeiniges Wadenheben an Stufe",3,"15/Bein","60 s"]]},
+ BANK:{name:"Bankdrücken (Langhantel)",ex:[
+  ["Bankdrücken, mit Partner absichern",4,"5–8","2–3 min"],
+  ["Dips",3,"6–12","2 min"],
+  ["Bulgarische Split Squats mit Rucksack",3,"8–12/Bein","90 s"],
+  ["Klimmzüge mit Rucksack (Schule)",3,"5–8","2 min"]]}
+};
+function runFor(w,type){
+  const P=paces(); const dl=isDeload(w);
+  const ph = w<=4?0: w<=16?1: w<=36?2:3;
+  if(type==="int"){
+    if(ph===0||dl) return {t:"Lockerer Lauf",d:"30 min locker ("+P.easy+" /km)"+(ph===0?" + 6 × 20 s Steigerungen":"")+(dl?" · Entlastungswoche: keine Intervalle":"")};
+    const v=[null,"6–10 × 400 m, 90 s Trabpause","5–6 × 1000 m, 2 min Trabpause","3 × 1600 m, 3 min Pause"][ph];
+    return {t:"Intervalle",d:"10–15 min einlaufen · "+v+" @ "+(ph===3?"Zielpace oder schneller":P.interval+" /km")+" · 10 min auslaufen"};
+  }
+  if(type==="tempo"){
+    if(ph===0||dl) return {t:"Lockerer Lauf",d:"30–40 min locker ("+P.easy+" /km)"+(dl?" · Entlastung":"")};
+    const v=[null,"15–20 min am Stück","20–25 min oder 3 × 10 min","25 min"][ph];
+    return {t:"Tempolauf",d:"10–15 min einlaufen · "+v+" @ "+P.tempo+" /km · 10 min auslaufen"};
+  }
+  if(type==="long"){
+    let v=["50–60","60–70","70–80","60–70"][ph];
+    return {t:"Langer Lauf",d:v+" min locker ("+P.easy+" /km)"+(dl?" · Entlastung: ca. 30 % kürzer":"")};
+  }
+  if(type==="easy"){
+    if(ph===0) return null;
+    return {t:"Lockerer Lauf",d:"30–40 min locker ("+P.easy+" /km), am Ende 4–6 Steigerungen"+(dl?" · Entlastung: kürzer":"")};
+  }
+}
+function dayPlan(d){
+  const w=weekNo(d); const wd=d.getDay(); const dl=isDeload(w); const sp=strengthPhase(w);
+  const items=[];
+  const kraft=(k)=>{let key=k; if(k==="A"&&w>=37) key="BANK"; items.push({kind:"kraft",key,title:KRAFT[key].name,dl})};
+  switch(wd){
+    case 1: kraft("A"); items.push({kind:"info",title:"Schwimmen",d:"Deine eigene Einheit"}); break;
+    case 2: items.push(Object.assign({kind:"run"},runFor(w,"int"))); break;
+    case 3: kraft("B"); {const r=runFor(w,"easy"); if(r) items.push(Object.assign({kind:"run"},r));} break;
+    case 4: items.push(Object.assign({kind:"run"},runFor(w,"tempo"))); break;
+    case 5: kraft("C"); items.push({kind:"info",title:"Schwimmen",d:"Deine eigene Einheit"}); break;
+    case 6: items.push(Object.assign({kind:"run"},runFor(w,"long"))); break;
+    case 0: items.push({kind:"rest",title:"Ruhetag",d:"Höchstens Spaziergang. Schlaf ist heute Training."}); break;
+  }
+  return {w,dl,sp,items};
+}
+function shortLabel(d){
+  const p=dayPlan(d); return p.items.map(i=>i.kind==="kraft"?i.key.replace("BANK","Bank"):i.kind==="run"?(i.t.startsWith("Inter")?"Int":i.t.startsWith("Tempo")?"Tempo":i.t.startsWith("Lang")?"Lang":"Lauf"):i.kind==="rest"?"Ruhe":"").filter(Boolean).join("+")
+}
+
+/* ---------- Ansichten ---------- */
+let view="heute", planTab="kraft", fortTab="weight";
+const $=s=>document.querySelector(s);
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+
+function header(){
+  const t=new Date();
+  if(!S.start){$("#hdr").textContent="Noch nicht gestartet";return}
+  if(new Date()<parse(S.start)){$("#hdr").textContent="Start am "+parse(S.start).toLocaleDateString("de-DE");return}
+  const w=weekNo(t); const sp=strengthPhase(w);
+  $("#hdr").textContent="Woche "+Math.min(w,52)+" von 52 · Phase "+sp.name+(isDeload(w)?" · Entlastungswoche":"");
+}
+
+function vSetup(){
+  return `<div class="card"><h2>Los geht's</h2>
+  <p class="mute">Wähle den Montag, an dem du startest. Daraus berechnet die App jede Woche, Phase und Entlastungswoche automatisch.</p>
+  <label>Startdatum</label><input type="date" id="st" value="${iso(nextMonday())}">
+  <label>5-km-Testzeit (optional, z. B. 25:00)</label><input id="t5" placeholder="mm:ss" inputmode="numeric">
+  <div style="height:10px"></div><button class="btn full" id="go">Starten</button>
+  <div class="note">Vor dem Start einmal zum Sportarzt. In Woche 1 machst du die Starttests (5 km, Liegestütze-Maximum, Klimmzüge, Gewicht).</div></div>`;
+}
+
+function exList(key,dateKey,dl){
+  const k=KRAFT[key]; const st=S.sets[dateKey]||{};
+  return k.ex.map((e,i)=>{
+    let n=e[1]; if(dl) n=Math.max(1,Math.ceil(n/2));
+    let reps=e[2]; const sp=strengthPhase(weekNo(parse(dateKey)));
+    if(key==="A"&&i===0&&sp.aReps) reps=sp.aReps;
+    const boxes=Array.from({length:n},(_,j)=>`<button class="set ${st[i+"-"+j]?"done":""}" data-set="${dateKey}|${i}-${j}">${j+1}</button>`).join("");
+    return `<div class="ex"><div class="t"><span class="n">${esc(e[0])}</span><span class="d">${n} × ${esc(reps)} · ${e[3]}</span></div><div class="sets">${boxes}</div></div>`;
+  }).join("");
+}
+
+function vHeute(){
+  if(!S.start) return vSetup();
+  const d=new Date(); const dk=iso(d); const p=dayPlan(d);
+  let h=`<div class="card"><div class="mute">${fmtDate(d)}</div><div class="big">${p.items.map(i=>esc(i.title)).join(" + ")}</div>
+    <div>${p.dl?'<span class="pill warn">Entlastung: halbe Sätze</span>':''}<span class="pill acc">Woche ${Math.min(p.w,52)}</span><span class="pill">${esc(p.sp.ruck)}</span></div></div>`;
+  for(const it of p.items){
+    if(it.kind==="kraft"){
+      h+=`<div class="card"><h2>${esc(it.title)}</h2><div class="mute">Aufwärmen: 8–10 min locker rudern. Jeder Satz endet 1–2 Wdh. vor dem Versagen.</div>${exList(it.key,dk,it.dl)}</div>`;
+    }else if(it.kind==="run"){
+      h+=`<div class="card"><h2>${esc(it.t)}</h2><div>${esc(it.d)}</div>${paces().known?"":'<div class="note">Trag unter „Mehr“ deine 5-km-Testzeit ein, dann passen sich die Paces an. Bis dahin gilt ein Startwert von 25:00.</div>'}</div>`;
+    }else{
+      h+=`<div class="card"><h2>${esc(it.title)}</h2><div class="mute">${esc(it.d)}</div></div>`;
+    }
+  }
+  const isDone=!!S.done[dk];
+  h+=`<button class="btn full ${isDone?"sec":""}" id="dayDone">${isDone?"✓ Erledigt (rückgängig)":"Training erledigt"}</button>`;
+  // Woche
+  const mon=mondayOf(d); let wk="";
+  for(let i=0;i<7;i++){const x=new Date(mon);x.setDate(mon.getDate()+i);const k=iso(x);
+    wk+=`<div class="wd ${k===dk?"today":""} ${S.done[k]?"done":""}"><b>${DAYS[x.getDay()]}</b>${shortLabel(x)}</div>`}
+  h+=`<div class="card" style="margin-top:12px"><h2>Diese Woche</h2><div class="week">${wk}</div></div>`;
+  return h;
+}
+
+function vPlan(){
+  const tabs=[["kraft","Kraft"],["lauf","Laufen"],["woche","Woche"],["phasen","Phasen"]];
+  let h=`<div class="tabs">${tabs.map(t=>`<button data-pt="${t[0]}" class="${planTab===t[0]?"on":""}">${t[1]}</button>`).join("")}</div>`;
+  if(planTab==="kraft"){
+    for(const key of ["A","B","C"]){const k=KRAFT[key];
+      h+=`<div class="card"><h2>${k.name}</h2><table><tr><th>Übung</th><th>Sätze × Wdh.</th><th>Pause</th></tr>${k.ex.map(e=>`<tr><td>${esc(e[0])}</td><td>${e[1]} × ${esc(e[2])}</td><td>${e[3]}</td></tr>`).join("")}</table></div>`}
+    h+=`<div class="card"><h2>Steigerung</h2><p>Schaffst du in allen Sätzen die obere Wiederholungszahl mit 1–2 Wdh. Reserve: 1–2 kg mehr in den Rucksack (1 l Wasser = 1 kg).</p><p>Geht der Rucksack nicht schwerer: Liegestütze normal → Füße erhöht → Deficit → Archer.</p><div class="note">Für 50 kg Bankdrücken brauchst du spätestens in den letzten 3–4 Monaten 1× pro Woche eine echte Langhantel (Schul-Kraftraum, Verein, Studio). Faustregel: 15 saubere Liegestütze mit ca. 20 kg Rucksack ≈ 50 kg × 10 in Reichweite.</div></div>`;
+  }else if(planTab==="lauf"){
+    const P=paces();
+    h+=`<div class="card"><h2>Deine Paces</h2><div class="mute">${P.known?"Aus deinem Test "+esc(S.test5k):"Startwert 25:00 – unter „Mehr“ eigene Testzeit eintragen"}</div>
+      <table><tr><th>Tempo</th><th>Gefühl</th><th>min/km</th></tr>
+      <tr><td>Locker (~80 %)</td><td>ganze Sätze sprechen</td><td>${P.easy}</td></tr>
+      <tr><td>Tempo</td><td>„angenehm hart“</td><td>${P.tempo}</td></tr>
+      <tr><td>Intervall</td><td>hart, schweres Atmen</td><td>${P.interval}</td></tr>
+      <tr><td>Ziel 5 km</td><td>unter 23:00</td><td>${P.goal}</td></tr></table></div>`;
+    h+=`<div class="card"><h2>Phasen</h2><table><tr><th>Wochen</th><th>Intervalle (Di)</th><th>Tempo (Do)</th><th>Lang (Sa)</th></tr>
+      <tr><td>1–4</td><td>locker 30 min + 6×20 s</td><td>locker</td><td>50–60 min</td></tr>
+      <tr><td>5–16</td><td>6–10 × 400 m</td><td>15–20 min</td><td>60–70 min</td></tr>
+      <tr><td>17–36</td><td>5–6 × 1000 m</td><td>20–25 min</td><td>70–80 min</td></tr>
+      <tr><td>37–52</td><td>3 × 1600 m</td><td>25 min</td><td>60–70 min</td></tr></table>
+      <p class="mute">Mittwoch ab Woche 5: 30–40 min locker. Langen Lauf um höchstens ca. 10 % pro Woche verlängern.</p>
+      <div class="note">Schmerzregel: Wird ein Schmerz beim Laufen schlimmer oder ist er am nächsten Morgen noch da, 3 Tage nicht laufen, stattdessen rudern. Bleibt er: Arzt.</div></div>`;
+  }else if(planTab==="woche"){
+    const rows=[["Mo","Kraft A + Schwimmen","Beine nicht bis ans Limit"],["Di","Intervall-Lauf","Wochen 1–4 locker"],["Mi","Kraft B + lockerer Lauf","Lauf ab Woche 5"],["Do","Tempo-Lauf","Wochen 1–4 locker"],["Fr","Kraft C + Schwimmen",""],["Sa","Langer lockerer Lauf","bewusst langsam"],["So","Ruhe","höchstens Spaziergang"]];
+    h+=`<div class="card"><h2>Wochenplan</h2><table>${rows.map(r=>`<tr><td><b>${r[0]}</b></td><td>${r[1]}</td><td class="mute">${r[2]}</td></tr>`).join("")}</table><p class="mute">Zu viel? Zuerst den Mittwochslauf streichen, nie den Ruhetag.</p></div>`;
+    h+=`<div class="card"><h2>Die 6 Regeln</h2><ol><li>Jeder Kraftsatz endet 1–2 Wdh. vor dem Versagen.</li><li>~80 % der Laufzeit locker, nur 2 harte Läufe pro Woche.</li><li>Langen Lauf höchstens ca. 10 % pro Woche verlängern.</li><li>Jede 4. Woche Entlastung: halbe Sätze, 30 % weniger Laufen, keine Intervalle.</li><li>0,15–0,3 kg pro Woche zunehmen, 100–130 g Protein am Tag.</li><li>Mindestens 8,5 Stunden Schlaf.</li></ol></div>`;
+    h+=`<div class="card"><h2>Sofort Entlastungswoche, wenn …</h2><ul><li>Ruhepuls morgens mehrere Tage 5–10 Schläge höher</li><li>Leistung sinkt 2 Wochen lang</li><li>Dauermüdigkeit oder schlechter Schlaf</li><li>häufig krank</li><li>Gewicht sinkt</li></ul></div>`;
+  }else{
+    h+=`<div class="card"><h2>Kraft-Phasen</h2><table><tr><th>Wochen</th><th>Schwerpunkt</th></tr>
+      <tr><td>1–4</td><td>Ohne Rucksack, Technik, Startwerte notieren</td></tr>
+      <tr><td>5–20</td><td>Rucksack schrittweise bis ca. 10–12 kg</td></tr>
+      <tr><td>21–36</td><td>Rucksack 15–20 kg+, bei A nur 5–8 Wdh.</td></tr>
+      <tr><td>37–52</td><td>1× pro Woche Langhantel-Bankdrücken statt A</td></tr></table></div>`;
+    h+=`<div class="card"><h2>Zwischenziele</h2><table><tr><th>Wann</th><th>5000 m</th><th>Drücken</th><th>Gewicht</th></tr>
+      <tr><td>Woche 1</td><td>testen</td><td>Max. ohne Rucksack</td><td>58 kg</td></tr>
+      <tr><td>3 Mon.</td><td>−1 min</td><td>12× mit 8–10 kg</td><td>60–61</td></tr>
+      <tr><td>6 Mon.</td><td>&lt; 23:30</td><td>12× mit 12–15 kg</td><td>61–63</td></tr>
+      <tr><td>9 Mon.</td><td>&lt; 22:30</td><td>15× mit ~20 kg</td><td>63–64</td></tr>
+      <tr><td>12 Mon.</td><td>21–22 min</td><td>Bank 50 kg × 10–12</td><td>64–66</td></tr></table>
+      <p class="mute">Liegst du hinten: zuerst Schlaf und Essen prüfen, nicht mehr trainieren. Alle 6 Wochen testen (nach der Entlastungswoche).</p></div>`;
+  }
+  return h;
+}
+
+/* ---------- Fortschritt ---------- */
+const LOGS={weight:{name:"Gewicht",unit:"kg",ph:"z. B. 58.4"},run5k:{name:"5 km",unit:"mm:ss",ph:"z. B. 24:30"},push:{name:"Liegestütze",unit:"Wdh. @ kg",ph:"Wdh."},pull:{name:"Klimmzüge",unit:"Wdh.",ph:"z. B. 15"}};
+function weeklyWeight(){
+  const m={}; for(const e of S.logs.weight){const k=iso(mondayOf(parse(e.date)));(m[k]=m[k]||[]).push(e.v)}
+  return Object.keys(m).sort().map(k=>({date:k,v:m[k].reduce((a,b)=>a+b,0)/m[k].length}));
+}
+function chart(points,isTime){
+  if(points.length<2) return `<div class="mute">Ab 2 Einträgen erscheint hier ein Diagramm.</div>`;
+  const W=600,H=170,p=28; const xs=points.map(q=>parse(q.date).getTime()); const ys=points.map(q=>q.v);
+  let x0=Math.min(...xs),x1=Math.max(...xs),y0=Math.min(...ys),y1=Math.max(...ys); if(y0===y1){y0-=1;y1+=1}
+  const pad=(y1-y0)*.15; y0-=pad;y1+=pad;
+  const X=t=>p+(W-2*p)*((t-x0)/((x1-x0)||1)), Y=v=>H-p-(H-2*p)*((v-y0)/(y1-y0));
+  const path=points.map((q,i)=>(i?"L":"M")+X(xs[i]).toFixed(1)+","+Y(q.v).toFixed(1)).join("");
+  const lab=v=>isTime?mmss(v):(Math.round(v*10)/10);
+  return `<svg class="chart" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
+    <line x1="${p}" y1="${H-p}" x2="${W-p}" y2="${H-p}" stroke="#2a313c"/>
+    <text x="4" y="${Y(y1-pad)+4}" fill="#9aa4b2" font-size="12">${lab(y1-pad)}</text>
+    <text x="4" y="${Y(y0+pad)+4}" fill="#9aa4b2" font-size="12">${lab(y0+pad)}</text>
+    <path d="${path}" fill="none" stroke="#4cc2ff" stroke-width="2.5" vector-effect="non-scaling-stroke"/>
+    ${points.map((q,i)=>`<circle cx="${X(xs[i])}" cy="${Y(q.v)}" r="3.5" fill="#4cc2ff"/>`).join("")}</svg>`;
+}
+function vFort(){
+  let h=`<div class="tabs">${Object.entries(LOGS).map(([k,o])=>`<button data-ft="${k}" class="${fortTab===k?"on":""}">${o.name}</button>`).join("")}</div>`;
+  const o=LOGS[fortTab]; const list=S.logs[fortTab]||[];
+  h+=`<div class="card"><h2>${o.name} eintragen</h2><div class="grid2"><div><label>Datum</label><input type="date" id="ld" value="${iso(new Date())}"></div>
+    <div><label>${o.unit==="Wdh. @ kg"?"Wiederholungen":o.name+" ("+o.unit+")"}</label><input id="lv" placeholder="${o.ph}" inputmode="decimal"></div></div>
+    ${fortTab==="push"?`<label>Rucksack-Gewicht (kg)</label><input id="lk" placeholder="0" inputmode="decimal">`:""}
+    <div style="height:10px"></div><button class="btn full" id="ladd">Speichern</button></div>`;
+  if(fortTab==="weight"){
+    const wk=weeklyWeight(); let msg="";
+    if(wk.length>=2){const a=wk[wk.length-2].v,b=wk[wk.length-1].v,diff=b-a;
+      let cls="ok",txt="Perfekt im Zielbereich (0,15–0,3 kg/Woche).";
+      if(diff<0.15){cls="warn";txt="Zu langsam: iss täglich 200–300 kcal mehr (z. B. Glas Milch + Handvoll Nüsse)."}
+      if(diff>0.4){cls="warn";txt="Zu schnell: iss täglich ca. 200 kcal weniger."}
+      msg=`<div class="row"><span class="big">${diff>=0?"+":""}${diff.toFixed(2)} kg</span><span class="pill ${cls}">letzte Woche</span></div><div class="mute">${txt}</div>`;
+    }else msg=`<div class="mute">Wiege dich 3–4× pro Woche morgens. Ab zwei Wochen zeigt die App deinen Wochentrend und ob du mehr oder weniger essen solltest.</div>`;
+    h+=`<div class="card"><h2>Wochenschnitt</h2>${msg}${chart(wk,false)}</div>`;
+  }else{
+    const pts=list.map(e=>({date:e.date,v:fortTab==="run5k"?e.v:e.v}));
+    h+=`<div class="card"><h2>Verlauf</h2>${chart(pts.sort((a,b)=>a.date<b.date?-1:1),fortTab==="run5k")}
+      ${fortTab==="run5k"?`<div class="mute">Ziel: unter 23:00 · Puffer 21–22 min</div>`:""}</div>`;
+  }
+  const rows=[...list].sort((a,b)=>a.date<b.date?1:-1).map((e,i)=>`<tr><td>${parse(e.date).toLocaleDateString("de-DE")}</td><td>${fortTab==="run5k"?mmss(e.v):e.v}${fortTab==="push"?" × @ "+(e.kg||0)+" kg":fortTab==="weight"?" kg":""}</td><td style="text-align:right"><button class="btn sec" style="padding:4px 10px" data-del="${e.date}|${e.v}|${e.kg??""}">✕</button></td></tr>`).join("");
+  h+=`<div class="card"><h2>Einträge</h2>${rows?`<table>${rows}</table>`:'<div class="mute">Noch keine Einträge.</div>'}</div>`;
+  return h;
+}
+
+/* ---------- Essen ---------- */
+function vEssen(){
+  return `<div class="card"><h2>Tagesziele</h2><table>
+   <tr><td>Kalorien</td><td>Start 3.300–3.500 kcal, über die Waage steuern</td></tr>
+   <tr><td>Protein</td><td>100–130 g, auf 4–5 Mahlzeiten</td></tr>
+   <tr><td>Kohlenhydrate</td><td>ca. 350–450 g</td></tr>
+   <tr><td>Fett</td><td>ca. 70–100 g</td></tr>
+   <tr><td>Trinken</td><td>2,5–3,5 l</td></tr></table></div>
+  <div class="card"><h2>Beispieltag (~3.600 kcal)</h2><table>
+   <tr><th>Mahlzeit</th><th>Was</th><th>kcal</th></tr>
+   <tr><td>Frühstück</td><td>100 g Haferflocken, 400 ml Vollmilch, Banane, 1 EL Erdnussbutter</td><td>850</td></tr>
+   <tr><td>Schule</td><td>2 Vollkornbrötchen mit Käse und Pute, Apfel</td><td>600</td></tr>
+   <tr><td>Mittag</td><td>125 g Reis (roh), 150 g Hähnchen oder Linsen, Gemüse mit Öl</td><td>750</td></tr>
+   <tr><td>Nach Training</td><td>300 ml Kakao, 50 g Müsli, Obst</td><td>450</td></tr>
+   <tr><td>Abend</td><td>3 Eier, 3 Scheiben Vollkornbrot mit Butter, Gemüse</td><td>650</td></tr>
+   <tr><td>Vor dem Schlafen</td><td>250 g Magerquark oder Skyr, 30 g Nüsse</td><td>330</td></tr></table></div>
+  <div class="card"><h2>Steuerung</h2><ol><li>3–4× pro Woche morgens wiegen (unter „Fortschritt“ eintragen).</li><li>Unter +0,15 kg/Woche: 200–300 kcal mehr.</li><li>Über +0,4 kg/Woche (2 Wochen lang): 200 kcal weniger.</li></ol>
+  <p class="mute">Kein Hunger? Kalorien trinken (Milch, Kakao, Smoothie mit Haferflocken), Nüsse und Käse als Snacks.</p>
+  <div class="note">Supplements brauchst du nicht. Kreatin raten Kinderärzte unter 18 ab. Keine Testo-Booster oder „Mass Gainer“ mit Zusatzstoffen.</div></div>`;
+}
+
+/* ---------- Mehr ---------- */
+function vMehr(){
+  return `<div class="card"><h2>Einstellungen</h2>
+   <label>Startdatum (Montag von Woche 1)</label><input type="date" id="st2" value="${S.start||iso(mondayOf(new Date()))}">
+   <label>Letzte 5-km-Testzeit (mm:ss) – bestimmt deine Paces</label><input id="t52" value="${esc(S.test5k||"")}" placeholder="z. B. 24:30">
+   <div style="height:10px"></div><button class="btn full" id="saveSet">Speichern</button></div>
+  <div class="card"><h2>Daten sichern</h2><p class="mute">Deine Daten bleiben nur auf diesem Gerät gespeichert. Handy und iPad synchronisieren sich nicht. Mit Export/Import kannst du sie übertragen.</p>
+   <div class="row"><button class="btn sec" id="exp">Exportieren</button><button class="btn sec" id="imp">Importieren</button></div>
+   <textarea id="io" class="hide" style="width:100%;height:120px;margin-top:8px;background:#1f242d;color:#e8ecf1;border:1px solid #2a313c;border-radius:10px;padding:8px"></textarea>
+   <button class="btn hide" id="impGo" style="margin-top:8px">Import übernehmen</button></div>
+  <div class="card"><h2>Als App installieren</h2><p class="mute"><b>iPhone/iPad:</b> In Safari öffnen → Teilen-Symbol → „Zum Home-Bildschirm“.<br><b>Android:</b> In Chrome → Menü ⋮ → „App installieren“.</p></div>
+  <div class="card"><button class="btn sec full" id="reset" style="color:var(--bad)">Alle Daten löschen</button></div>`;
+}
+
+/* ---------- Render & Events ---------- */
+function render(){
+  header();
+  const m={heute:vHeute,plan:vPlan,fort:vFort,essen:vEssen,mehr:vMehr};
+  $("#app").innerHTML=m[view]();
+  document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("on",b.dataset.v===view));
+  window.scrollTo(0,0);
+}
+document.getElementById("nav").addEventListener("click",e=>{const b=e.target.closest("button");if(b){view=b.dataset.v;render()}});
+document.getElementById("app").addEventListener("click",e=>{
+  const t=e.target.closest("button"); if(!t) return;
+  if(t.id==="go"){const v=$("#st").value; if(!v) return; S.start=iso(mondayOf(parse(v))); const tt=$("#t5").value.trim(); if(toSec(tt)){S.test5k=tt;S.logs.run5k.push({date:iso(new Date()),v:toSec(tt)})} save(); render(); return}
+  if(t.dataset.set){const [dk,id]=t.dataset.set.split("|"); S.sets[dk]=S.sets[dk]||{}; S.sets[dk][id]=!S.sets[dk][id]; save(); t.classList.toggle("done"); return}
+  if(t.id==="dayDone"){const dk=iso(new Date()); if(S.done[dk]) delete S.done[dk]; else S.done[dk]=true; save(); render(); return}
+  if(t.dataset.pt){planTab=t.dataset.pt; render(); return}
+  if(t.dataset.ft){fortTab=t.dataset.ft; render(); return}
+  if(t.id==="ladd"){
+    const d=$("#ld").value, raw=$("#lv").value.trim().replace(",","."); if(!d||!raw) return;
+    let v; if(fortTab==="run5k"){v=toSec(raw); if(!v){alert("Format mm:ss, z. B. 24:30");return} S.test5k=mmss(v)} else {v=parseFloat(raw); if(isNaN(v)) return}
+    const e={date:d,v}; if(fortTab==="push") e.kg=parseFloat(($("#lk").value||"0").replace(",","."))||0;
+    S.logs[fortTab].push(e); save(); render(); return}
+  if(t.dataset.del){const [d,v,kg]=t.dataset.del.split("|"); const arr=S.logs[fortTab]; const i=arr.findIndex(e=>e.date===d&&String(e.v)===v&&String(e.kg??"")===kg); if(i>=0){arr.splice(i,1);save();render()} return}
+  if(t.id==="saveSet"){const v=$("#st2").value; if(v) S.start=iso(mondayOf(parse(v))); const tt=$("#t52").value.trim(); if(tt===""||toSec(tt)) S.test5k=tt||null; save(); render(); return}
+  if(t.id==="exp"){const io=$("#io"); io.classList.remove("hide"); io.value=JSON.stringify(S); io.select(); try{navigator.clipboard.writeText(io.value)}catch(_){}; return}
+  if(t.id==="imp"){const io=$("#io"); io.classList.remove("hide"); io.value=""; $("#impGo").classList.remove("hide"); io.focus(); return}
+  if(t.id==="impGo"){try{const o=JSON.parse($("#io").value); if(!o||typeof o!=="object") throw 0; S=Object.assign({start:null,test5k:null,logs:{weight:[],run5k:[],push:[],pull:[]},done:{},sets:{}},o); save(); render()}catch(_){alert("Ungültige Daten")} return}
+  if(t.id==="reset"){if(confirm("Wirklich alle Daten löschen?")){S={start:null,test5k:null,logs:{weight:[],run5k:[],push:[],pull:[]},done:{},sets:{}};save();view="heute";render()} return}
+});
+render();
+if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}))}
+</script>
+</body>
+</html>
