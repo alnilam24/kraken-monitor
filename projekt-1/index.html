@@ -314,7 +314,7 @@ INFO["Rumpfdrehbeugen"]={w:"Im Stehen abwechselnd mit einer Hand zum gegenüberl
 INFO["Satz-Kästchen"]={w:"Jedes Kästchen ist ein Satz. Bei „4 × 6–12“ hast du vier Kästchen für vier Sätze.",s:["Satz machen.","Kästchen antippen, es wird farbig.","Pause laut Angabe, dann der nächste Satz.","Sind alle Kästchen voll, kommt die nächste Übung."],t:"So verlierst du nie den Überblick, wie viele Sätze du schon hast. Wenn die ganze Einheit fertig ist, oben rechts den Haken antippen."};
 INFO["10-km-Lauf auf Zeit"]={w:"Alle acht Wochen läufst du deine 10 km zügig auf Zeit statt des Tempolaufs. Er liegt immer direkt nach einer Entlastungswoche, damit du ausgeruht bist.",s:["15 min locker einlaufen.","10 km zügig und gleichmäßig. Starte etwas langsamer, als du denkst, und werde zum Ende schneller, wenn es geht.","10 min locker auslaufen.","Werte eintragen, die Zeit landet in der Statistik."],t:"Am Sonntag danach ist trotzdem der lange lockere Lauf. Lauf den dann wirklich ruhig."};
 INFO["Wiegen"]={w:"Dein Gewicht schwankt am Tag um bis zu 1–2 kg, je nach Essen, Trinken und Toilette. Damit die Werte vergleichbar sind, wiegst du dich immer gleich.",s:["Montag, Mittwoch, Freitag und Sonntag.","Morgens direkt nach dem Aufstehen und nach der Toilette.","Vor dem Essen und Trinken.","In Unterwäsche, immer auf derselben Waage am selben Platz.","Wert sofort in der App eintragen."],t:"Einzelne Werte sind egal. Die App rechnet den Wochenschnitt aus, und nur der zählt."};
-INFO["Krafttest"]={w:"Alle acht Wochen misst du, wie stark du geworden bist. Die Werte landen in der Statistik.",s:["Normal aufwärmen: 8–10 min rudern, dann 10 lockere Liegestütze.","Liegestütze-Test: mit dem angegebenen Rucksack-Gewicht so viele saubere Wiederholungen wie möglich. Brust bis eine Faust über dem Boden, oben Arme gestreckt, Körper gerade.","3 Minuten Pause.","Klimmzug-Test in der Schule: aus dem toten Hang, Ristgriff, Kinn über die Stange, kein Schwung. So viele wie möglich.","Danach Kraft A wie geplant, aber mit einem Satz weniger pro Übung."],t:"Gezählt wird nur, was sauber war. Halbe Wiederholungen zählen nicht."};
+INFO["Krafttest"]={w:"Alle acht Wochen misst du, wie stark du geworden bist. Die Werte landen in der Statistik.",s:["Normal aufwärmen: 8–10 min rudern, dann 10 lockere Liegestütze.","Liegestütze-Test: mit dem angegebenen Rucksack-Gewicht so viele saubere Wiederholungen wie möglich. Brust bis eine Faust über dem Boden, oben Arme gestreckt, Körper gerade.","3 Minuten Pause.","Klimmzug-Test in der Schule: aus dem toten Hang, Ristgriff, Kinn über die Stange, kein Schwung. So viele wie möglich.","Danach Kraft A ohne Liegestütze und Klimmzüge. Die hast du im Test schon gemacht, die App blendet sie aus."],t:"Der Test kommt bewusst zuerst, weil du nur ausgeruht deinen echten Bestwert schaffst. Gezählt wird nur, was sauber war."};
 INFO["5-km-Test"]={w:"Alle acht Wochen läufst du 5 km auf Zeit. Daraus berechnet die App deine Laufgeschwindigkeiten neu.",s:["Flache Strecke oder Bahn, am besten immer dieselbe.","15 min locker einlaufen, dabei 3 Steigerungen über 15–20 Sekunden.","5 km so schnell, wie du gleichmäßig durchhältst. Der erste Kilometer nicht schneller als der Rest.","10 min locker auslaufen.","Unten Distanz, Zeit und Puls eintragen und Art „5-km-Test“ lassen."],t:"Am Vortag ist Ruhe oder nur Krafttraining, also bist du ausgeruht."};
 INFO["Rucksack-Gewicht"]={w:"Der Rucksack ersetzt die Hantel. Bei jeder Übung zeigt die App, wie viel Gewicht diese Woche ungefähr hinein soll. Der Wert steigt mit den Wochen automatisch.",s:["Rucksack einmal leer und einmal gepackt auf die Personenwaage stellen, oder dich mit und ohne Rucksack wiegen. Die Differenz ist das Gewicht.","Füllen mit Wasserflaschen (1 l = 1 kg), Büchern oder einer Tüte Reis (1 kg). Alles fest packen, damit nichts rutscht.","Hüft- und Brustgurt schließen, das Gewicht soll eng am Rücken liegen.","Fang am unteren Ende des Bereichs an. Schaffst du in allen Sätzen die obere Wiederholungszahl, beim nächsten Mal 1–2 kg mehr.","Schaffst du die untere Wiederholungszahl nicht sauber, nimm 1–2 kg raus. Die Wiederholungen sind wichtiger als die Zahl auf dem Rucksack."],t:"Bei Füßen erhöht und Deficit-Liegestützen ist weniger Gewicht nötig, weil die Übung schon schwerer ist. Das ist im Wert schon eingerechnet."};
 function infoBtn(k){return INFO[k]?`<button class="info" data-info="${esc(k)}" aria-label="Erklärung zu ${esc(k)}">i</button>`:""}
@@ -350,7 +350,7 @@ function dayPlan(d){
   const kraft=k=>{const key=(k==="A"&&w>=37)?"BANK":k;items.push({kind:"kraft",key})};
   const run=t=>{const r=runFor(w,t);if(r)items.push(Object.assign({kind:"run"},r))};
   switch(wd){
-    case 1:if(isTest(w))items.push({kind:"test"});kraft("A");items.push({kind:"swim"});break;
+    case 1:if(isTest(w))items.push({kind:"test"});kraft("A");if(isTest(w))items[items.length-1].skip=[0,3];items.push({kind:"swim"});break;
     case 2:run("int");break;
     case 3:items.push({kind:"rest",opt:true});break;
     case 4:kraft("B");run("easy");break;
@@ -416,10 +416,12 @@ function header(){
   const w=weekNo(t);$("#hdr").textContent="Woche "+Math.min(w,52)+" von 52";
 }
 
-function exItems(key,dk,dl,live){
-  const done=(S.ex||{})[dk]||{},ph=phase(weekNo(parse(dk)));
+function exItems(it,dk,dl,live,T){
+  const key=it.key,skip=it.skip||[];
+  const done=(T.ex||{})[dk]||{},ph=phase(weekNo(parse(dk)));
   let open="",fin="";
   KRAFT[key].ex.forEach((e,i)=>{
+    if(skip.includes(i))return;
     const n=dl?Math.max(1,Math.ceil(e[1]/2)):e[1];
     const reps=(key==="A"&&i===0&&ph.a)?ph.a:e[2];
     if(done[i]){fin+=`<div class="item exdone"><div class="donerow"><span class="tick">${CHECK_SVG}</span><span class="name">${esc(e[0])}</span></div><button class="undo" data-exundo="${i}">Rückgängig</button></div>`;return}
@@ -429,7 +431,7 @@ function exItems(key,dk,dl,live){
       <div class="top"><span class="name">${esc(e[0])}${infoBtn(e[0])}</span></div>
       <div class="meta"><span class="setbars" aria-hidden="true">${bars}</span><b class="num">${n} Sätze × ${esc(reps)}</b><span>Pause ${e[3]}</span></div>
       ${k?`<span class="kg">${k}</span>`:""}</div>
-      <button class="check" ${live?`data-excheck="${i}"`:"disabled"} aria-label="${esc(e[0])} abhaken">${CHECK_SVG}</button></div></div>`;
+      <button class="check" data-excheck="${i}" aria-label="${esc(e[0])} abhaken">${CHECK_SVG}</button></div></div>`;
   });
   return open+fin;
 }
@@ -443,25 +445,28 @@ function runForm(prefix,type){
   </div></div>`;
 }
 
+const PREVIEW={items:{},ex:{},done:{}};
+function viewCtx(){const d0=new Date();d0.setHours(0,0,0,0);const pre=d0<parse(S.start);return {pre,dk:pre?S.start:iso(new Date()),T:pre?PREVIEW:S}}
+function kraftIdx(it){return KRAFT[it.key].ex.map((_,i)=>i).filter(i=>!(it.skip||[]).includes(i))}
 function unitKey(it){return it.kind==="kraft"?"kraft":it.kind==="run"?"run":it.kind==="test"?"test":it.kind==="swim"?"swim":null}
 const CHECK_SVG='<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
 function checkBtn(u,label){return `<button class="check" data-check="${u}" aria-label="${esc(label)} abhaken">${CHECK_SVG}</button>`}
-function syncDone(dk){
-  const p=dayPlan(parse(dk)),st=(S.items||{})[dk]||{};
+function syncDone(dk,T=S){
+  const p=dayPlan(parse(dk)),st=(T.items||{})[dk]||{};
   const req=p.items.map(unitKey).filter(u=>u&&u!=="swim");
-  if(req.length&&req.every(u=>st[u]))S.done[dk]=true;else delete S.done[dk];
+  T.done=T.done||{};if(req.length&&req.every(u=>st[u]))T.done[dk]=true;else delete T.done[dk];
 }
 function vHeute(){
   const d0=new Date();d0.setHours(0,0,0,0);const pre=d0<parse(S.start);
   const d=pre?parse(S.start):new Date(),dk=iso(d),p=dayPlan(d);
-  S.items=S.items||{};const st=S.items[dk]||{};
+  const T=pre?PREVIEW:S;T.items=T.items||{};const st=T.items[dk]||{};
   const titles=p.items.filter(i=>i.kind!=="swim"&&i.kind!=="test").map(titleOf).join(" + ");
-  let h=`<div class="hero"><div class="date">${pre?"Dein Start: ":""}${fmtDate(d)}</div><h1>${esc(titles)}</h1>${pre?'<div class="prenote">Vorschau auf deinen ersten Tag. Abhaken kannst du ab dem Start.</div>':""}
+  let h=`<div class="hero"><div class="date">${pre?"Dein Start: ":""}${fmtDate(d)}</div><h1>${esc(titles)}</h1>${pre?'<div class="prenote">Vorschau auf deinen ersten Tag. Du kannst das Abhaken hier ausprobieren, gespeichert wird aber erst ab dem Start.</div>':""}
     <div class="sub">Phase ${p.ph.name}${p.dl?", Entlastungswoche":""}</div>
     <div class="chips">${isTest(p.w)?'<span class="chip c t-ink" style="color:var(--on)">Testwoche</span>':""}${p.dl?'<span class="chip w">Halbe Sätze, weniger Laufen</span>':""}${p.items.some(i=>i.kind==="kraft")?`<span class="chip">${esc(p.ph.hint)}</span>`:""}</div></div>`;
   const mon=mondayOf(d);let lanes="";
   for(let i=0;i<7;i++){const x=new Date(mon);x.setDate(mon.getDate()+i);const k=iso(x),lab=laneLabel(x);
-    lanes+=`<div class="lane t-${laneType(x)} ${k===dk?"today":""} ${S.done[k]?"done":""} ${lab==="Ruhe"?"rest":""}"><div class="d">${DAYS[x.getDay()]}</div><div class="k">${lab}</div></div>`}
+    lanes+=`<div class="lane t-${laneType(x)} ${k===dk?"today":""} ${(T.done||{})[k]?"done":""} ${lab==="Ruhe"?"rest":""}"><div class="d">${DAYS[x.getDay()]}</div><div class="k">${lab}</div></div>`}
   h+=`<div class="lanes">${lanes}</div>`;
   if([1,3,5,0].includes(d.getDay())&&!pre){
     const got=S.logs.weight.find(e=>e.date===dk);
@@ -472,10 +477,10 @@ function vHeute(){
   for(const it of p.items){
     const u=unitKey(it);
     if(u&&st[u]){doneList.push({u,it});continue}
-    const cb=u?(pre?`<button class="check" disabled aria-label="Ab dem Start abhakbar">${CHECK_SVG}</button>`:checkBtn(u,titleOf(it))):"";
+    const cb=(u&&u!=="kraft")?checkBtn(u,titleOf(it)):"";
     if(it.kind==="kraft"){
       const k=KRAFT[it.key];
-      h+=`<div class="sec unit t-kraft" data-u="${u}"><h2><span class="dot"></span>${k.name}${cb}</h2><div class="lead">${k.tag}. Erst 8–10 min locker rudern. Jeder Satz endet 1–2 Wiederholungen vor dem Versagen. Ist eine Übung fertig, rechts abhaken. Oben rechts hakst du die ganze Einheit auf einmal ab.</div><div class="group">${exItems(it.key,dk,p.dl,!pre)}</div></div>`;
+      h+=`<div class="sec unit t-kraft" data-u="${u}"><h2><span class="dot"></span>${k.name}${cb}</h2><div class="lead">${k.tag}. Erst 8–10 min locker rudern. Jeder Satz endet 1–2 Wiederholungen vor dem Versagen. Ist eine Übung fertig, rechts abhaken. Sind alle abgehakt, ist die Einheit geschafft.${it.skip?" Heute ohne Liegestütze und Klimmzüge, die hast du im Krafttest schon gemacht.":""}</div><div class="group">${exItems(it,dk,p.dl,!pre,T)}</div></div>`;
     }else if(it.kind==="run"){
       h+=`<div class="sec unit t-lauf" data-u="${u}"><h2><span class="dot"></span>${esc(it.t)}${infoBtn(it.t)}${cb}</h2><div class="group"><div class="item"><div class="name">${esc(it.d)}</div>
         <div class="chips"><span class="chip c num">${esc(it.pace)}${/^test/.test(it.run)?"":" min/km"}</span>${it.note?`<span class="chip w">${esc(it.note)}</span>`:""}</div>
@@ -484,7 +489,7 @@ function vHeute(){
         ${pre?"":runForm("r",it.run)}</div></div>`;
     }else if(it.kind==="test"){
       const kg=ruckKg("Liegestütze mit Rucksack",p.w).replace("Ohne Rucksack","ohne Rucksack");
-      h+=`<div class="sec unit t-ink" data-u="${u}"><h2><span class="dot"></span>Krafttest${infoBtn("Krafttest")}${cb}</h2><div class="lead">Vor Kraft A, nach dem Aufwärmen. Zähl ehrlich bis zur letzten sauberen Wiederholung, trag die Werte ein und hake ab.</div><div class="group"><div class="form"><div class="f">
+      h+=`<div class="sec unit t-ink" data-u="${u}"><h2><span class="dot"></span>Krafttest${infoBtn("Krafttest")}${cb}</h2><div class="lead">Zuerst, gleich nach dem Aufwärmen, solange du frisch bist. Zähl ehrlich bis zur letzten sauberen Wiederholung, trag die Werte ein und hake ab.</div><div class="group"><div class="form"><div class="f">
         <div><label for="tp">Liegestütze (${kg})</label><input id="tp" inputmode="numeric" placeholder="Wdh."></div>
         <div><label for="tk">Rucksack (kg)</label><input id="tk" inputmode="decimal" placeholder="0"></div>
         <div class="full"><label for="tq">Klimmzüge (Wdh.)</label><input id="tq" inputmode="numeric" placeholder="Wdh."></div></div></div></div></div>`;
@@ -495,7 +500,7 @@ function vHeute(){
     }
   }
   if(doneList.length){
-    const all=!!S.done[dk];
+    const all=!!(T.done||{})[dk];
     h+=`<div class="sec"><h2>${all?"Tagesprogramm geschafft":"Heute geschafft"}</h2>${all?'<div class="lead">Alles Pflichtprogramm für heute ist erledigt.</div>':""}<div class="group">${doneList.map(({u,it})=>{
       const cls=it.kind==="kraft"?"t-kraft":it.kind==="run"?"t-lauf":it.kind==="swim"?"t-swim":"t-ink";
       return `<div class="item entry ${cls}"><div class="donerow"><span class="tick">${CHECK_SVG}</span><span class="name">${esc(titleOf(it))}</span></div><button class="undo" data-uncheck="${u}">Rückgängig</button></div>`}).join("")}</div></div>`;
@@ -584,7 +589,7 @@ const RULES=[
   ["Schmerzen","Wird ein Schmerz beim Laufen schlimmer oder ist er am nächsten Morgen noch da: drei Tage nicht laufen, stattdessen rudern. Geht er nicht weg, untersuchen lassen."]]],
  ["Tests","t-ink",[
   ["Wann","In Woche 1 und danach alle acht Wochen, jeweils direkt nach einer Entlastungswoche. Die App zeigt „Testwoche“ an."],
-  ["Montag","Liegestütze mit dem aktuellen Rucksack-Gewicht und Klimmzüge, jeweils so viele saubere wie möglich. Danach normal Kraft A."],
+  ["Montag","Zuerst der Test: Liegestütze mit dem aktuellen Rucksack-Gewicht und Klimmzüge, jeweils so viele saubere wie möglich. Danach Kraft A ohne Liegestütze und Klimmzüge."],
   ["Freitag","5-km-Test statt Tempolauf. Die Zeit passt deine Laufgeschwindigkeiten automatisch an."],
   ["10 km auf Zeit","In Woche 5 und danach alle acht Wochen läufst du freitags statt des Tempolaufs 10 km zügig auf Zeit."]]],
  ["Essen und Trinken","t-food",[
@@ -737,31 +742,30 @@ $("#app").addEventListener("click",e=>{
   if(t.dataset.info){openInfo(t.dataset.info);return}
   if(t.dataset.theme){S.theme=t.dataset.theme;save();applyTheme();render();return}
   if(t.dataset.excheck!=null){
-    const dk=iso(new Date()),i=+t.dataset.excheck,p=dayPlan(new Date()),key=p.items.find(x=>x.kind==="kraft").key;
-    S.ex=S.ex||{};S.ex[dk]=S.ex[dk]||{};S.ex[dk][i]=true;
-    const allDone=KRAFT[key].ex.every((_,j)=>S.ex[dk][j]);
-    if(allDone){S.items=S.items||{};S.items[dk]=S.items[dk]||{};S.items[dk].kraft=true;syncDone(dk)}
-    save();
+    const {pre,dk,T}=viewCtx(),i=+t.dataset.excheck,it=dayPlan(parse(dk)).items.find(x=>x.kind==="kraft");
+    T.ex=T.ex||{};T.ex[dk]=T.ex[dk]||{};T.ex[dk][i]=true;
+    const allDone=kraftIdx(it).every(j=>T.ex[dk][j]);
+    if(allDone){T.items=T.items||{};T.items[dk]=T.items[dk]||{};T.items[dk].kraft=true;syncDone(dk,T)}
+    if(!pre)save();
     const el=t.closest(".item");t.style.background="var(--kraft)";t.style.borderColor="var(--kraft)";t.style.color="#fff";t.querySelector("svg").style.opacity=1;
     if(matchMedia("(prefers-reduced-motion: reduce)").matches){render();return}
     el.style.maxHeight=el.scrollHeight+"px";
     requestAnimationFrame(()=>{el.classList.add("leaving");setTimeout(()=>el.classList.add("gone"),330);
       setTimeout(()=>{if(allDone){const u=document.querySelector('.unit[data-u="kraft"]');if(u){u.style.maxHeight=u.scrollHeight+"px";u.classList.add("leaving");setTimeout(()=>u.classList.add("gone"),380);setTimeout(render,700);return}}render()},600)});
     return}
-  if(t.dataset.exundo!=null){const dk=iso(new Date());if(S.ex&&S.ex[dk])delete S.ex[dk][t.dataset.exundo];if(S.items&&S.items[dk])delete S.items[dk].kraft;syncDone(dk);save();render();return}
+  if(t.dataset.exundo!=null){const {pre,dk,T}=viewCtx();if(T.ex&&T.ex[dk])delete T.ex[dk][t.dataset.exundo];if(T.items&&T.items[dk])delete T.items[dk].kraft;syncDone(dk,T);if(!pre)save();render();return}
   if(t.dataset.check){
-    const u=t.dataset.check,dk=iso(new Date());
-    if(u==="run"&&$("#rkm")&&$("#rkm").value){const r=readRun("r");if(!r)return;addRun(r,dk)}
-    if(u==="test"){const pp=parseInt($("#tp").value),k=parseFloat(($("#tk").value||"0").replace(",","."))||0,q=parseInt($("#tq").value);
+    const u=t.dataset.check,{pre,dk,T}=viewCtx();
+    if(!pre&&u==="run"&&$("#rkm")&&$("#rkm").value){const r=readRun("r");if(!r)return;addRun(r,dk)}
+    if(!pre&&u==="test"){const pp=parseInt($("#tp").value),k=parseFloat(($("#tk").value||"0").replace(",","."))||0,q=parseInt($("#tq").value);
       if(!isNaN(pp))S.logs.push.push({date:dk,v:pp,kg:k});if(!isNaN(q))S.logs.pull.push({date:dk,v:q})}
-    if(u==="kraft"){const it=dayPlan(new Date()).items.find(x=>x.kind==="kraft");S.ex=S.ex||{};S.ex[dk]=S.ex[dk]||{};KRAFT[it.key].ex.forEach((_,j)=>S.ex[dk][j]=true)}
-    S.items=S.items||{};S.items[dk]=S.items[dk]||{};S.items[dk][u]=true;syncDone(dk);save();
+    T.items=T.items||{};T.items[dk]=T.items[dk]||{};T.items[dk][u]=true;syncDone(dk,T);if(!pre)save();
     const el=t.closest(".unit");
-    if(el&&!matchMedia("(prefers-reduced-motion: reduce)").matches){el.style.maxHeight=el.scrollHeight+"px";t.style.background="var(--c,var(--ink))";t.style.color="#fff";t.querySelector("svg").style.opacity=1;
+    if(el&&!matchMedia("(prefers-reduced-motion: reduce)").matches){el.style.maxHeight=el.scrollHeight+"px";t.style.background="var(--c,var(--ink))";t.style.borderColor="var(--c,var(--ink))";t.style.color="#fff";t.querySelector("svg").style.opacity=1;
       requestAnimationFrame(()=>{el.classList.add("leaving");setTimeout(()=>el.classList.add("gone"),380);setTimeout(render,700)})}
     else render();
     return}
-  if(t.dataset.uncheck){const dk=iso(new Date());if(S.items&&S.items[dk])delete S.items[dk][t.dataset.uncheck];if(t.dataset.uncheck==="kraft"&&S.ex)delete S.ex[dk];syncDone(dk);save();render();return}
+  if(t.dataset.uncheck){const {pre,dk,T}=viewCtx();if(T.items&&T.items[dk])delete T.items[dk][t.dataset.uncheck];if(t.dataset.uncheck==="kraft"&&T.ex)delete T.ex[dk];syncDone(dk,T);if(!pre)save();render();return}
   if(t.id==="qwSave"){const v=parseFloat(($("#qw").value||"").replace(",","."));if(isNaN(v))return;S.logs.weight.push({date:iso(new Date()),v});save();render();return}
   if(t.id==="testSave"){const d=iso(new Date()),pp=parseInt($("#tp").value),k=parseFloat(($("#tk").value||"0").replace(",","."))||0,q=parseInt($("#tq").value);
     if(!isNaN(pp))S.logs.push.push({date:d,v:pp,kg:k});if(!isNaN(q))S.logs.pull.push({date:d,v:q});save();t.textContent="Gespeichert";return}
