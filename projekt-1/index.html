@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Projekt 1</title>
-<meta name="theme-color" content="#F2F4F6" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#0F151C" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -15,130 +15,125 @@
 <link rel="icon" href="icon-192.png">
 <style>
 :root{
-  --bg:#F2F4F6;--surface:#FFFFFF;--sunk:#E9EDF1;--ink:#15202B;--mute:#6B7785;--line:#E1E6EB;
-  --acc:#FF5A1F;--acc-soft:#FFE6DC;--acc2:#0E7C86;--acc2-soft:#DCF1F2;--ok:#1F9D6B;--warn:#B8690F;--warn-soft:#FBEEDB;
-  --font:ui-rounded,"SF Pro Rounded",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --bg:#FFFFFF;--surface:#FFFFFF;--sunk:#F3F3F3;--ink:#000000;--mute:#6E6E6E;--line:#E2E2E2;--hair:#000000;
+  --acc:#000000;--on:#FFFFFF;--acc2:#000000;--soft:#F3F3F3;
+  --font:"SF Pro Display",system-ui,-apple-system,"Helvetica Neue",Helvetica,Arial,sans-serif;
 }
 @media (prefers-color-scheme:dark){:root{
-  --bg:#0F151C;--surface:#182029;--sunk:#121920;--ink:#EDF1F5;--mute:#8C98A5;--line:#26313D;
-  --acc:#FF6A33;--acc-soft:#3A2018;--acc2:#3CC3CC;--acc2-soft:#16302F;--ok:#3CCB8E;--warn:#E9A13B;--warn-soft:#33270F;
+  --bg:#000000;--surface:#000000;--sunk:#161616;--ink:#FFFFFF;--mute:#9A9A9A;--line:#2A2A2A;--hair:#FFFFFF;
+  --acc:#FFFFFF;--on:#000000;--acc2:#FFFFFF;--soft:#141414;
 }}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 var(--font);-webkit-font-smoothing:antialiased}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 var(--font);-webkit-font-smoothing:antialiased;letter-spacing:-.1px}
 button,input,select,textarea{font:inherit;color:inherit}
-:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
 .num{font-variant-numeric:tabular-nums}
-header{position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:saturate(1.4) blur(14px);-webkit-backdrop-filter:saturate(1.4) blur(14px);
-  padding:calc(env(safe-area-inset-top) + 12px) 20px 10px;display:flex;justify-content:space-between;align-items:center}
-header .brand{font-weight:700;font-size:17px;letter-spacing:-.2px}
+header{position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--bg) 90%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  padding:calc(env(safe-area-inset-top) + 12px) 20px 11px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line)}
+header .brand{font-weight:800;font-size:16px;letter-spacing:-.3px}
 header .wk{font-size:14px;color:var(--mute)}
-main{padding:4px 16px calc(96px + env(safe-area-inset-bottom));max-width:720px;margin:0 auto}
-nav{position:fixed;bottom:0;left:0;right:0;z-index:5;display:flex;justify-content:center;
-  background:color-mix(in srgb,var(--surface) 90%,transparent);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
-  border-top:1px solid var(--line);padding:6px 6px calc(6px + env(safe-area-inset-bottom))}
+main{padding:0 20px calc(96px + env(safe-area-inset-bottom));max-width:720px;margin:0 auto}
+nav{position:fixed;bottom:0;left:0;right:0;z-index:5;display:flex;justify-content:center;background:color-mix(in srgb,var(--bg) 92%,transparent);
+  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid var(--line);padding:0 6px env(safe-area-inset-bottom)}
 nav .in{display:flex;width:100%;max-width:520px}
-nav button{flex:1;background:none;border:0;color:var(--mute);padding:6px 0 4px;font-size:11px;font-weight:600;display:flex;flex-direction:column;align-items:center;gap:3px;border-radius:12px}
-nav svg{width:24px;height:24px}
-nav button.on{color:var(--acc)}
+nav button{flex:1;background:none;border:0;border-top:2px solid transparent;color:var(--mute);padding:8px 0 6px;font-size:11px;font-weight:600;display:flex;flex-direction:column;align-items:center;gap:3px}
+nav svg{width:23px;height:23px}
+nav button.on{color:var(--ink);border-top-color:var(--ink)}
 
-/* Hero */
-.hero{padding:14px 4px 6px}
+.hero{padding:22px 0 4px}
 .hero .date{color:var(--mute);font-size:15px}
-.hero h1{margin:2px 0 0;font-size:34px;line-height:1.08;letter-spacing:-.8px;font-weight:800}
-.hero .sub{margin-top:6px;color:var(--mute);font-size:15px}
-.lanes{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin:18px 0 6px}
-.lane{border-radius:12px;padding:8px 0 9px;text-align:center;background:var(--surface);border:1px solid var(--line)}
+.hero h1{margin:4px 0 0;font-size:40px;line-height:1.02;letter-spacing:-1.6px;font-weight:800}
+.hero .sub{margin-top:8px;color:var(--mute);font-size:15px}
+.lanes{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin:20px 0 4px}
+.lane{border-radius:8px;padding:8px 0 9px;text-align:center;border:1px solid var(--line);min-height:58px}
 .lane .d{font-size:12px;color:var(--mute);font-weight:600}
 .lane .k{font-size:11.5px;font-weight:700;margin-top:2px;line-height:1.2;padding:0 2px;hyphens:manual}
-.lane .k span{display:block;font-weight:600;color:var(--mute)}
-.lane.done .k span{color:rgba(255,255,255,.85)}
-.lane.today{border-color:var(--acc);box-shadow:inset 0 0 0 1px var(--acc)}
-.lane.done{background:var(--acc);border-color:var(--acc);color:#fff}
-.lane.done .d{color:rgba(255,255,255,.85)}
-.lane.rest .k{color:var(--mute);font-weight:600}
+.lane .k span{display:block;font-weight:500;color:var(--mute)}
+.lane.today{border:1.5px solid var(--hair)}
+.lane.done{background:var(--acc);border-color:var(--acc);color:var(--on)}
+.lane.done .d,.lane.done .k span{color:var(--on);opacity:.75}
+.lane.rest .k{color:var(--mute);font-weight:500}
 
-/* Sections */
-.sec{margin-top:22px}
-.sec>h2{font-size:20px;letter-spacing:-.3px;margin:0 4px 10px;font-weight:750}
-.sec>.lead{margin:-4px 4px 12px;color:var(--mute);font-size:14px}
-.group{background:var(--surface);border:1px solid var(--line);border-radius:18px;overflow:hidden}
+.sec{margin-top:30px}
+.sec>h2{font-size:22px;letter-spacing:-.6px;margin:0 0 4px;font-weight:800;display:flex;align-items:center}
+.sec>.lead{margin:0 0 12px;color:var(--mute);font-size:14px}
+.group{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--surface)}
 .group+.group{margin-top:12px}
-.item{padding:14px 16px;border-top:1px solid var(--line)}
+.item{padding:15px 16px;border-top:1px solid var(--line)}
 .item:first-child{border-top:0}
 .item .top{display:flex;justify-content:space-between;gap:12px;align-items:baseline}
 .item .name{font-weight:650}
-.item .rx{color:var(--mute);font-size:14px;white-space:nowrap}
-.item p{margin:6px 0 0;color:var(--mute);font-size:14px}
-.sets{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
-.set{min-width:46px;height:40px;padding:0 12px;border-radius:12px;border:1.5px solid var(--line);background:var(--sunk);font-weight:700;color:var(--mute);transition:background .15s,border-color .15s,color .15s}
-.set.done{background:var(--acc);border-color:var(--acc);color:#fff}
+.item .rx{font-size:14px;white-space:nowrap;font-weight:600}
+.item p{margin:5px 0 0;color:var(--mute);font-size:14px}
+.sets{display:flex;gap:6px;margin-top:12px;flex-wrap:wrap}
+.set{min-width:46px;height:40px;padding:0 12px;border-radius:8px;border:1px solid var(--line);background:none;font-weight:700;color:var(--mute);transition:background .12s,color .12s,border-color .12s}
+.set.done{background:var(--acc);border-color:var(--acc);color:var(--on)}
 .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
-.chip{border-radius:999px;padding:5px 11px;font-size:13px;font-weight:650;background:var(--sunk);color:var(--ink)}
-.chip.a{background:var(--acc-soft);color:var(--acc)}
-.chip.b{background:var(--acc2-soft);color:var(--acc2)}
-.chip.w{background:var(--warn-soft);color:var(--warn)}
-.callout{margin-top:12px;padding:12px 14px;border-radius:14px;background:var(--warn-soft);color:var(--ink);font-size:14px}
-.callout b{color:var(--warn)}
+.chip{border-radius:6px;padding:4px 9px;font-size:13px;font-weight:600;border:1px solid var(--line);color:var(--ink)}
+.chip.a{background:var(--acc);border-color:var(--acc);color:var(--on)}
+.chip.b{border-color:var(--hair)}
+.chip.w{background:var(--sunk);border-color:var(--sunk)}
+.kg{display:inline-block;margin-top:8px;font-size:13px;font-weight:700;border-bottom:1.5px solid var(--hair);padding-bottom:1px}
+.callout{margin-top:14px;padding:12px 14px;border-left:2px solid var(--hair);background:var(--soft);border-radius:0 10px 10px 0;font-size:14px}
+.callout b{color:var(--ink)}
 
-/* Buttons & forms */
-.btn{border:0;border-radius:14px;padding:14px 16px;font-weight:700;font-size:16px;background:var(--acc);color:#fff;width:100%}
-.btn.ghost{background:var(--surface);color:var(--ink);border:1px solid var(--line)}
-.btn.small{width:auto;padding:9px 14px;font-size:14px;border-radius:12px}
+.btn{border:0;border-radius:10px;padding:15px 16px;font-weight:700;font-size:16px;background:var(--acc);color:var(--on);width:100%;letter-spacing:-.2px}
+.btn.ghost{background:none;color:var(--ink);border:1px solid var(--hair)}
 .btnrow{display:flex;gap:8px;margin-top:14px}
-.seg{display:flex;background:var(--sunk);border-radius:12px;padding:3px;gap:2px;margin:0 0 14px;overflow-x:auto}
-.seg button{flex:1 0 auto;border:0;background:none;padding:8px 12px;border-radius:10px;font-size:14px;font-weight:650;color:var(--mute);white-space:nowrap}
-.seg button.on{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.08)}
-.form{padding:14px 16px}
-.f{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.seg{display:flex;border-bottom:1px solid var(--line);gap:18px;margin:6px 0 16px;overflow-x:auto}
+.seg button{flex:none;border:0;background:none;padding:10px 0 9px;font-size:15px;font-weight:650;color:var(--mute);border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap}
+.seg button.on{color:var(--ink);border-bottom-color:var(--ink)}
+.form{padding:16px}
+.f{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .f .full{grid-column:1/-1}
-label{display:block;font-size:13px;color:var(--mute);font-weight:600;margin:0 0 5px}
-input,select,textarea{width:100%;background:var(--sunk);border:1px solid transparent;border-radius:12px;padding:11px 12px;font-size:16px}
-input:focus,select:focus,textarea:focus{border-color:var(--acc);outline:none}
+label{display:block;font-size:13px;color:var(--mute);font-weight:600;margin:0 0 6px}
+input,select,textarea{width:100%;background:var(--sunk);border:1px solid transparent;border-radius:10px;padding:12px;font-size:16px}
+input:focus,select:focus,textarea:focus{border-color:var(--hair);outline:none;background:var(--bg)}
 
-/* Stats */
-.kpis{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.kpi{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:14px 16px}
-.kpi .v{font-size:28px;font-weight:800;letter-spacing:-.6px;line-height:1.1}
-.kpi .v small{font-size:15px;font-weight:650;color:var(--mute);margin-left:2px}
-.kpi .l{font-size:13px;color:var(--mute);margin-top:2px}
-.panel{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:14px 14px 8px;margin-top:12px}
-.panel h3{margin:0 2px;font-size:16px;font-weight:700}
-.panel .note{margin:2px 2px 6px;font-size:13px;color:var(--mute)}
-.panel .empty{padding:18px 2px 14px;color:var(--mute);font-size:14px}
+.kpis{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-top:12px}
+.kpi{padding:15px 16px;border-top:1px solid var(--line)}
+.kpi:nth-child(-n+2){border-top:0}
+.kpi:nth-child(odd){border-right:1px solid var(--line)}
+.kpi .v{font-size:30px;font-weight:800;letter-spacing:-1px;line-height:1.05}
+.kpi .v small{font-size:15px;font-weight:600;color:var(--mute);margin-left:3px;letter-spacing:0}
+.kpi .l{font-size:13px;color:var(--mute);margin-top:4px}
+.panel{border:1px solid var(--line);border-radius:12px;padding:15px 14px 8px;margin-top:12px}
+.panel h3{margin:0 2px;font-size:17px;font-weight:750;letter-spacing:-.3px}
+.panel .note{margin:3px 2px 8px;font-size:13px;color:var(--mute)}
+.panel .empty{padding:16px 2px 14px;color:var(--mute);font-size:14px}
 svg.chart{width:100%;height:auto;display:block}
 .chart text{font:600 11px var(--font);fill:var(--mute)}
-.ring{display:flex;align-items:center;gap:14px;margin-top:16px;padding:14px 16px;background:var(--surface);border:1px solid var(--line);border-radius:18px}
+.ring{display:flex;align-items:center;gap:16px;margin-top:18px;padding:16px;border:1px solid var(--line);border-radius:12px}
 .ring svg{flex:none}
-.ring .t{font-weight:700}
+.ring .t{font-weight:800;font-size:18px;letter-spacing:-.4px}
 .ring .s{color:var(--mute);font-size:14px}
 .heat{display:grid;grid-template-columns:repeat(12,1fr);gap:4px;margin:10px 2px 8px}
 .heat .col{display:grid;grid-template-rows:repeat(7,1fr);gap:4px}
-.heat i{display:block;aspect-ratio:1;border-radius:4px;background:var(--sunk)}
-.heat i.on{background:var(--acc)}
+.heat i{display:block;aspect-ratio:1;border-radius:3px;background:var(--sunk)}
+.heat i.on{background:var(--ink)}
 .heat i.fut{background:transparent;border:1px dashed var(--line)}
 table{width:100%;border-collapse:collapse;font-size:14px}
-th,td{text-align:left;padding:9px 0;border-top:1px solid var(--line);vertical-align:top}
+th,td{text-align:left;padding:10px 0;border-top:1px solid var(--line);vertical-align:top}
 tr:first-child th,tr:first-child td{border-top:0}
 th{color:var(--mute);font-weight:600}
 td+td,th+th{padding-left:10px}
 .entry{display:flex;justify-content:space-between;align-items:center;gap:10px}
 .entry .m{color:var(--mute);font-size:13px}
-.x{border:0;background:var(--sunk);width:32px;height:32px;border-radius:10px;color:var(--mute);font-size:15px;flex:none}
+.x{border:1px solid var(--line);background:none;width:32px;height:32px;border-radius:8px;color:var(--mute);font-size:14px;flex:none}
 ol,ul{margin:6px 0 0;padding-left:20px}li{margin:5px 0}
 .hide{display:none}
-.info{flex:none;width:22px;height:22px;border-radius:50%;border:1.5px solid var(--line);background:none;color:var(--mute);font:700 12px/1 Georgia,serif;font-style:italic;padding:0;margin-left:6px;vertical-align:2px}
-.info:active{background:var(--sunk)}
-.sheet-bg{position:fixed;inset:0;z-index:20;background:rgba(10,15,20,.45);display:flex;align-items:flex-end;justify-content:center;opacity:0;transition:opacity .2s}
+.info{flex:none;width:20px;height:20px;border-radius:50%;border:1px solid var(--line);background:none;color:var(--mute);font:italic 700 11px/1 Georgia,"Times New Roman",serif;padding:0;margin-left:7px;vertical-align:2px;display:inline-flex;align-items:center;justify-content:center}
+.info:active{border-color:var(--hair);color:var(--ink)}
+.sheet-bg{position:fixed;inset:0;z-index:20;background:rgba(0,0,0,.5);display:flex;align-items:flex-end;justify-content:center;opacity:0;transition:opacity .2s}
 .sheet-bg.open{opacity:1}
-.sheet{background:var(--surface);width:100%;max-width:560px;max-height:82vh;overflow:auto;border-radius:22px 22px 0 0;padding:10px 20px calc(24px + env(safe-area-inset-bottom));transform:translateY(24px);transition:transform .22s}
+.sheet{background:var(--bg);width:100%;max-width:560px;max-height:84vh;overflow:auto;border-radius:16px 16px 0 0;padding:10px 22px calc(24px + env(safe-area-inset-bottom));transform:translateY(24px);transition:transform .22s;border-top:1px solid var(--line)}
 .sheet-bg.open .sheet{transform:none}
-.sheet .grab{width:38px;height:5px;border-radius:3px;background:var(--line);margin:0 auto 14px}
-.sheet h3{margin:0 0 6px;font-size:22px;letter-spacing:-.4px}
-.sheet .what{color:var(--mute);margin:0 0 14px}
-.sheet h4{margin:16px 0 4px;font-size:15px}
-.sheet ol,.sheet ul{margin:4px 0 0}
-.sheet .close{margin-top:20px}
-@media (min-width:600px){.sheet-bg{align-items:center}.sheet{border-radius:22px}}
+.sheet .grab{width:36px;height:4px;border-radius:2px;background:var(--line);margin:0 auto 16px}
+.sheet h3{margin:0 0 8px;font-size:26px;letter-spacing:-.9px;font-weight:800;line-height:1.1}
+.sheet .what{color:var(--mute);margin:0 0 6px}
+.sheet h4{margin:18px 0 4px;font-size:15px;font-weight:750;padding-top:14px;border-top:1px solid var(--line)}
+.sheet .close{margin-top:22px}
+@media (min-width:600px){.sheet-bg{align-items:center}.sheet{border-radius:16px;border:1px solid var(--line)}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
@@ -245,6 +240,17 @@ const INFO={
  "Intervalle":{w:"Mehrere schnelle Abschnitte mit kurzen Trabpausen. Sie machen dich schneller und gewöhnen dich an das Zieltempo.",s:["10–15 min locker einlaufen.","Jeden Abschnitt gleichmäßig im angegebenen Tempo laufen, nicht den ersten zu schnell.","In der Pause langsam traben, nicht stehen bleiben.","10 min locker auslaufen."],t:"Auf der Apple Watch unter „Training“, „Eigenes Training“ anlegen, dann piept sie bei jedem Wechsel."},
  "Tempolauf":{w:"Ein längerer Abschnitt im angenehm harten Tempo. Hier lernst du, ein hohes Tempo lange zu halten.",s:["10–15 min locker einlaufen.","Den Tempoabschnitt gleichmäßig laufen: Sprechen geht nur noch in kurzen Worten.","10 min locker auslaufen."],t:"Am Ende solltest du das Gefühl haben, noch 5–10 Minuten weiterlaufen zu können."}
 };
+const BAND=[[4,0,0],[8,2,4],[12,4,6],[16,6,9],[20,8,12],[28,12,16],[36,15,20],[999,18,22]];
+const RUCK={"Liegestütze, Füße erhöht, mit Rucksack":[.8,0],"Deficit-Liegestütze zwischen Stühlen":[.7,0],"Liegestütze mit Rucksack":[.6,0],
+ "Bulgarische Split Squats mit Rucksack":[1,0],"Ausfallschritte gehend mit Rucksack":[.8,0],"Einbeiniges rumänisches Kreuzheben":[.6,0],
+ "Klimmzüge mit Rucksack (Schule)":[.3,8],"Dips zwischen zwei Stühlen":[.4,8],"Dips":[.4,8]};
+function ruckKg(name,w){
+  const r=RUCK[name];if(!r)return null;
+  if(w<=4||w<=r[1])return "Ohne Rucksack";
+  const b=BAND.find(x=>w<=x[0]);let lo=Math.round(b[1]*r[0]),hi=Math.round(b[2]*r[0]);if(hi<=lo)hi=lo+1;if(lo<1)lo=1;
+  return "Rucksack "+lo+"–"+hi+" kg";
+}
+INFO["Rucksack-Gewicht"]={w:"Der Rucksack ersetzt die Hantel. Bei jeder Übung zeigt die App, wie viel Gewicht diese Woche ungefähr hinein soll. Der Wert steigt mit den Wochen automatisch.",s:["Rucksack einmal leer und einmal gepackt auf die Personenwaage stellen, oder dich mit und ohne Rucksack wiegen. Die Differenz ist das Gewicht.","Füllen mit Wasserflaschen (1 l = 1 kg), Büchern oder einer Tüte Reis (1 kg). Alles fest packen, damit nichts rutscht.","Hüft- und Brustgurt schließen, das Gewicht soll eng am Rücken liegen.","Fang am unteren Ende des Bereichs an. Schaffst du in allen Sätzen die obere Wiederholungszahl, beim nächsten Mal 1–2 kg mehr.","Schaffst du die untere Wiederholungszahl nicht sauber, nimm 1–2 kg raus. Die Wiederholungen sind wichtiger als die Zahl auf dem Rucksack."],t:"Bei Füßen erhöht und Deficit-Liegestützen ist weniger Gewicht nötig, weil die Übung schon schwerer ist. Das ist im Wert schon eingerechnet."};
 function infoBtn(k){return INFO[k]?`<button class="info" data-info="${esc(k)}" aria-label="Erklärung zu ${esc(k)}">i</button>`:""}
 function openInfo(k){
   const i=INFO[k];if(!i)return;
@@ -309,11 +315,11 @@ function lineChart(pts,{fmt=v=>de(v),goal=null,goalLabel="",invert=false,h=150,c
   const base=h-B;
   const area=line+` L${X(xs[xs.length-1]).toFixed(1)} ${base} L${X(xs[0]).toFixed(1)} ${base} Z`;
   const ticks=[0,.5,1].map(f=>y0+pad+(y1-y0-2*pad)*f);
-  let s=`<svg class="chart" viewBox="0 0 ${W} ${h}" role="img"><defs><linearGradient id="${id}" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="${color}" stop-opacity=".22"/><stop offset="1" stop-color="${color}" stop-opacity="0"/></linearGradient></defs>`;
+  let s=`<svg class="chart" viewBox="0 0 ${W} ${h}" role="img"><defs><linearGradient id="${id}" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="${color}" stop-opacity=".14"/><stop offset="1" stop-color="${color}" stop-opacity="0"/></linearGradient></defs>`;
   ticks.forEach(v=>{s+=`<line x1="${L}" x2="${W-R}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--line)" stroke-dasharray="2 4"/><text x="${L-6}" y="${Y(v)+4}" text-anchor="end">${fmt(v)}</text>`});
-  if(goal!=null)s+=`<line x1="${L}" x2="${W-R}" y1="${Y(goal)}" y2="${Y(goal)}" stroke="var(--acc2)" stroke-width="1.5"/><text x="${W-R}" y="${Y(goal)-5}" text-anchor="end" style="fill:var(--acc2)">${goalLabel}</text>`;
-  s+=`<path d="${area}" fill="url(#${id})"/><path d="${line}" fill="none" stroke="${color}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>`;
-  pts.forEach((p,i)=>{s+=`<circle cx="${X(xs[i])}" cy="${Y(p.v)}" r="${i===pts.length-1?4.5:3}" fill="${i===pts.length-1?color:"var(--surface)"}" stroke="${color}" stroke-width="2"/>`});
+  if(goal!=null)s+=`<line x1="${L}" x2="${W-R}" y1="${Y(goal)}" y2="${Y(goal)}" stroke="var(--ink)" stroke-width="1" stroke-dasharray="5 4"/><text x="${W-R}" y="${Y(goal)-5}" text-anchor="end" style="fill:var(--ink)">${goalLabel}</text>`;
+  s+=`<path d="${area}" fill="url(#${id})"/><path d="${line}" fill="none" stroke="${color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`;
+  pts.forEach((p,i)=>{s+=`<circle cx="${X(xs[i])}" cy="${Y(p.v)}" r="${i===pts.length-1?4:2.5}" fill="${i===pts.length-1?color:"var(--surface)"}" stroke="${color}" stroke-width="2"/>`});
   s+=`<text x="${L}" y="${h-5}">${short(pts[0].date)}</text><text x="${W-R}" y="${h-5}" text-anchor="end">${short(pts[pts.length-1].date)}</text></svg>`;
   return s;
 }
@@ -321,14 +327,14 @@ function barChart(bars,{h=150,fmt=v=>de(v,0),color="var(--acc)"}={}){
   const L=10,R=10,T=18,B=22,max=Math.max(1,...bars.map(b=>b.v)),n=bars.length,gw=(W-L-R)/n,bw=Math.min(26,gw*.62);
   let s=`<svg class="chart" viewBox="0 0 ${W} ${h}" role="img"><line x1="${L}" x2="${W-R}" y1="${h-B}" y2="${h-B}" stroke="var(--line)"/>`;
   bars.forEach((b,i)=>{const bh=(h-T-B)*(b.v/max),x=L+gw*i+(gw-bw)/2,y=h-B-bh,last=i===n-1;
-    s+=`<rect x="${x}" y="${y}" width="${bw}" height="${Math.max(bh,b.v?2:0)}" rx="6" fill="${last?color:"color-mix(in srgb, "+color+" 35%, transparent)"}"/>`;
+    s+=`<rect x="${x}" y="${y}" width="${bw}" height="${Math.max(bh,b.v?2:0)}" rx="3" fill="${last?color:"color-mix(in srgb, "+color+" 22%, transparent)"}"/>`;
     if(b.v)s+=`<text x="${x+bw/2}" y="${y-5}" text-anchor="middle">${fmt(b.v)}</text>`;
     s+=`<text x="${x+bw/2}" y="${h-6}" text-anchor="middle">${b.l}</text>`});
   return s+`</svg>`;
 }
 function ringSvg(frac,size=64){
   const r=size/2-6,c=2*Math.PI*r;
-  return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}"><circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="var(--sunk)" stroke-width="7"/><circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="var(--acc)" stroke-width="7" stroke-linecap="round" stroke-dasharray="${c*Math.min(1,frac)} ${c}" transform="rotate(-90 ${size/2} ${size/2})"/></svg>`;
+  return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}"><circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="var(--line)" stroke-width="5"/><circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="var(--ink)" stroke-width="5" stroke-linecap="butt" stroke-dasharray="${c*Math.min(1,frac)} ${c}" transform="rotate(-90 ${size/2} ${size/2})"/></svg>`;
 }
 const panel=(title,note,body)=>`<div class="panel"><h3>${title}</h3>${note?`<div class="note">${note}</div>`:""}${body||`<div class="empty">Noch zu wenige Einträge. Ab zwei Werten erscheint hier ein Diagramm.</div>`}</div>`;
 
@@ -347,7 +353,7 @@ function exItems(key,dk,dl){
     const n=dl?Math.max(1,Math.ceil(e[1]/2)):e[1];
     const reps=(key==="A"&&i===0&&ph.a)?ph.a:e[2];
     const b=Array.from({length:n},(_,j)=>`<button class="set ${st[i+"-"+j]?"done":""}" data-set="${dk}|${i}-${j}" aria-label="Satz ${j+1}">${j+1}</button>`).join("");
-    return `<div class="item"><div class="top"><span class="name">${esc(e[0])}${infoBtn(e[0])}</span><span class="rx num">${n} × ${esc(reps)}</span></div><p>Pause ${e[3]}</p><div class="sets">${b}</div></div>`;
+    return `<div class="item"><div class="top"><span class="name">${esc(e[0])}${infoBtn(e[0])}</span><span class="rx num">${n} × ${esc(reps)}</span></div><p>Pause ${e[3]}</p>${(()=>{const k=ruckKg(e[0],weekNo(parse(dk)));return k?`<span class="kg">${k}</span>`:""})()}<div class="sets">${b}</div></div>`;
   }).join("");
 }
 function runForm(prefix,type){
@@ -374,7 +380,7 @@ function vHeute(){
   for(const it of p.items){
     if(it.kind==="kraft"){
       const k=KRAFT[it.key];
-      h+=`<div class="sec"><h2>${k.name}</h2><div class="lead">${k.tag}. Erst 8–10 min locker rudern. Jeder Satz endet 1–2 Wiederholungen vor dem Versagen.</div><div class="group">${exItems(it.key,dk,p.dl)}</div></div>`;
+      h+=`<div class="sec"><h2>${k.name}</h2><div class="lead">${k.tag}. Erst 8–10 min locker rudern. Jeder Satz endet 1–2 Wiederholungen vor dem Versagen. Wie viel in den Rucksack kommt, steht bei jeder Übung ${infoBtn("Rucksack-Gewicht")}</div><div class="group">${exItems(it.key,dk,p.dl)}</div></div>`;
     }else if(it.kind==="run"){
       h+=`<div class="sec"><h2>${esc(it.t)}${infoBtn(it.t)}</h2><div class="group"><div class="item"><div class="name">${esc(it.d)}</div>
         <div class="chips"><span class="chip b num">${esc(it.pace)} min/km</span>${it.note?`<span class="chip w">${esc(it.note)}</span>`:""}</div>
@@ -399,7 +405,7 @@ function vPlan(){
   if(planTab==="kraft"){
     for(const key of ["A","B","C"]){const k=KRAFT[key];
       h+=`<div class="sec"><h2>${k.name}</h2><div class="lead">${dayName(key)}, ${k.tag}</div><div class="group">${k.ex.map(e=>`<div class="item"><div class="top"><span class="name">${esc(e[0])}${infoBtn(e[0])}</span><span class="rx num">${e[1]} × ${esc(e[2])}</span></div><p>Pause ${e[3]}</p></div>`).join("")}</div></div>`}
-    h+=`<div class="sec"><h2>So wird es schwerer</h2><div class="group"><div class="item"><p style="margin:0;color:var(--ink)">Schaffst du in allen Sätzen die obere Wiederholungszahl mit 1–2 Wiederholungen Reserve, packst du 1–2 kg mehr in den Rucksack. Ein Liter Wasser wiegt 1 kg.</p><p>Geht der Rucksack nicht schwerer, nimm die nächste Stufe: normale Liegestütze, Füße erhöht, Deficit, Archer.</p></div></div>
+    h+=`<div class="sec"><h2>So wird es schwerer</h2><div class="group"><div class="item"><p style="margin:0;color:var(--ink)">Schaffst du in allen Sätzen die obere Wiederholungszahl mit 1–2 Wiederholungen Reserve, packst du 1–2 kg mehr in den Rucksack. Ein Liter Wasser wiegt 1 kg. ${infoBtn("Rucksack-Gewicht")}</p></div><div class="item"><p style="margin:0 0 6px">Richtwerte für den Rucksack. Die genaue Angabe steht bei jeder Übung auf „Heute“.</p><table><tr><th>Woche</th><th>Liegestütze</th><th>Beine</th><th>Klimmzüge, Dips</th></tr>${[2,6,10,14,18,24,32,44].map((w,i)=>`<tr><td>${["1–4","5–8","9–12","13–16","17–20","21–28","29–36","37–52"][i]}</td><td class="num">${ruckKg("Liegestütze, Füße erhöht, mit Rucksack",w).replace("Rucksack ","").replace("Ohne Rucksack","ohne")}</td><td class="num">${ruckKg("Bulgarische Split Squats mit Rucksack",w).replace("Rucksack ","").replace("Ohne Rucksack","ohne")}</td><td class="num">${ruckKg("Klimmzüge mit Rucksack (Schule)",w).replace("Rucksack ","").replace("Ohne Rucksack","ohne")}</td></tr>`).join("")}</table><p>Geht der Rucksack nicht schwerer, nimm die nächste Stufe: normale Liegestütze, Füße erhöht, Deficit, Archer.</p></div></div>
       <div class="callout"><b>Bankdrücken:</b> In den letzten 3–4 Monaten brauchst du einmal pro Woche eine echte Langhantel, zum Beispiel im Kraftraum der Schule, im Verein oder im Studio. Faustregel: 15 saubere Liegestütze mit etwa 20 kg im Rucksack bedeuten, dass 50 kg × 10 in Reichweite sind.</div></div>`;
   }else if(planTab==="lauf"){
     const P=paces();
@@ -456,7 +462,7 @@ function dayName(k){return {A:"Montag",B:"Donnerstag",C:"Samstag"}[k]}
 /* ---------- Eintragen ---------- */
 const RUNTYPE={easy:"Locker",long:"Lang",tempo:"Tempo",int:"Intervalle",test:"5-km-Test"};
 function vLog(){
-  const tabs=[["lauf","Lauf"],["gewicht","Gewicht"],["kraft","Kraft"],["puls","Ruhepuls"]];
+  const tabs=[["lauf","Lauf"],["gewicht","Gewicht"],["kraft","Kraft"]];
   let h=`<div class="hero"><h1>Eintragen</h1><div class="sub">Werte aus der Fitness-App übernehmen</div></div>
     <div class="seg">${tabs.map(t=>`<button data-lt="${t[0]}" class="${logTab===t[0]?"on":""}">${t[1]}</button>`).join("")}</div>`;
   const dateField=`<div class="full"><label for="ld">Datum</label><input type="date" id="ld" value="${iso(new Date())}"></div>`;
@@ -516,12 +522,10 @@ function vStats(){
   h+=panel("Körpergewicht","Wochenschnitt. Ziel: 0,15–0,3 kg pro Woche mehr.",lineChart(ww,{fmt:v=>de(v),color:"var(--acc)"})+weightAdvice(ww));
   // Effizienz
   const eff=runs.filter(r=>(r.type==="easy"||r.type==="long")&&r.avg>0&&r.km>0).map(r=>({date:r.date,v:(r.km*1000/(r.sec/60))/r.avg}));
-  h+=panel("Lauf-Effizienz","Meter pro Herzschlag bei lockeren Läufen. Steigt die Linie, läufst du bei gleichem Puls schneller.",lineChart(eff,{fmt:v=>de(v,2),color:"var(--acc2)"}));
+  h+=panel("Lauf-Effizienz","Meter pro Herzschlag bei lockeren Läufen. Steigt die Linie, läufst du bei gleichem Puls schneller.",lineChart(eff,{fmt:v=>de(v,2),color:"var(--mute)"}));
   // Ø HF lockere Läufe
   const hr=runs.filter(r=>r.avg>0).map(r=>({date:r.date,v:r.avg}));
-  h+=panel("Ø Herzfrequenz pro Lauf","Alle Läufe mit Pulswert",lineChart(hr,{fmt:v=>de(v,0),color:"var(--acc2)"}));
-  // Ruhepuls
-  h+=panel("Ruhepuls","Steigt er mehrere Tage um 5–10 Schläge, brauchst du Erholung.",lineChart(S.logs.rhr,{fmt:v=>de(v,0),color:"var(--acc2)"})+rhrAdvice());
+  h+=panel("Ø Herzfrequenz pro Lauf","Alle Läufe mit Pulswert",lineChart(hr,{fmt:v=>de(v,0),color:"var(--mute)"}));
   // Kraft
   h+=panel("Liegestütze mit Rucksack","Rucksack-Gewicht bei deinen Maximaltests. Steigt die Linie, wirst du stärker.",pushChart());
   h+=panel("Klimmzüge","Maximale Wiederholungen",lineChart(S.logs.pull,{fmt:v=>de(v,0)}));
