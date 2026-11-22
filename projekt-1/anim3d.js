@@ -40,22 +40,43 @@ const RIB_R=[0.055,0.08,0.10,0.115,0.125,0.13,0.13,0.128,0.125,0.12,0.115,0.11];
 const RIB_F=[0.05,0.065,0.08,0.09,0.10,0.105,0.105,0.10,0.095,0.09,0.085,0.08];
 
 /* ---------- Posen ---------- */
-function posePush(t){ // t: 0 oben, 1 unten
-  const thTop=0.335,thBot=0.06,th=lerp(thTop,thBot,t);
-  const U=V(0,Math.sin(th),Math.cos(th)),F=V(0,-Math.cos(th),Math.sin(th));
-  const O=add(mul(F,-0.16),mul(U,0.89));
-  const fr=frame(O,U,F);
-  // Handposition fest: unter den Schultern in der oberen Position
-  const Ut=V(0,Math.sin(thTop),Math.cos(thTop)),Ft=V(0,-Math.cos(thTop),Math.sin(thTop));
-  const shTopZ=add(add(mul(Ft,-0.16),mul(Ut,0.89)),add(mul(Ut,SH_U),mul(Ft,-0.01)))[2];
-  const arms={};
-  for(const s of[-1,1]){
-    const S=fr.P(s*SH_R,SH_U,-0.01),T=V(s*0.25,0.04,shTopZ+0.02);
-    const pole=nrm(add(add(mul(fr.R,s*0.55),mul(U,-0.75)),mul(F,-0.35)));
-    const r=ik(S,T,UA,FA,pole);arms[s]={S,E:r.E,W:r.W,H:add(r.W,V(0,-0.03,0.09)),Hs:V(s,0,0)};
-  }
-  const act={pect:0.35+0.65*t,delt:0.3+0.6*t,tri:0.3+0.7*t,abs:0.65,quad:0.35,lat:0.1,bic:0.1,trap:0.15};
-  return {fr,arms,legs:{h:0,k:0},head:{f:0.03,u:0},act,elev:0,cam:V(0,0.22,0.8),scene:"floor"};
+function pushFrame(th,hf){const U=V(0,Math.sin(th),Math.cos(th)),F=V(0,-Math.cos(th),Math.sin(th));return {U,F,O:add(V(0,hf,0),add(mul(F,-0.16),mul(U,0.89)))}}
+function shoulderOf(th,hf){const q=pushFrame(th,hf);return add(q.O,add(mul(q.U,SH_U),mul(q.F,-0.01)))}
+function solveTh(hf,y){let lo=-0.6,hi=1.2;for(let i=0;i<40;i++){const m=(lo+hi)/2;if(shoulderOf(m,hf)[1]<y)lo=m;else hi=m}return (lo+hi)/2}
+function makePush(hf){
+  const thTop=solveTh(hf,0.6),thBot=solveTh(hf,0.24),shTopZ=shoulderOf(thTop,hf)[2];
+  return function(t){
+    const th=lerp(thTop,thBot,t),q=pushFrame(th,hf),fr=frame(q.O,q.U,q.F),U=q.U,F=q.F,arms={};
+    for(const s of[-1,1]){
+      const S=fr.P(s*SH_R,SH_U,-0.01),T=V(s*0.25,0.04,shTopZ+0.02);
+      const pole=nrm(add(add(mul(fr.R,s*0.55),mul(U,-0.75)),mul(F,-0.35)));
+      const r=ik(S,T,UA,FA,pole);arms[s]={S,E:r.E,W:r.W,H:add(r.W,V(0,-0.03,0.09))};
+    }
+    const act={pect:0.35+0.65*t,delt:0.3+0.6*t,tri:0.3+0.7*t,abs:0.65,quad:0.35,lat:0.1,bic:0.1,trap:0.15,glute:0.3};
+    return {fr,arms,legs:{h:0,k:0},head:{f:0.03,u:0},act,elev:0,cam:V(0,0.22+hf*0.4,0.8),scene:hf>0?"chairFeet":"floor",hf};
+  };
+}
+const posePush=makePush(0),posePushElev=makePush(0.45);
+function poseHollow(t){
+  const w=Math.sin(t*Math.PI*2),a=0.33+0.025*w,b=0.2+0.025*w;
+  const U=V(0,Math.sin(a),-Math.cos(a)),F=V(0,Math.cos(a),Math.sin(a)),O=V(0,0.1,0);
+  const fr=frame(O,U,F),arms={},dir=nrm(add(U,mul(F,0.12)));
+  for(const s of[-1,1]){const S=fr.P(s*SH_R,SH_U,-0.01),E=add(add(S,mul(dir,UA)),mul(fr.R,s*0.02)),W=add(E,mul(dir,FA));arms[s]={S,E,W,H:add(W,mul(dir,0.09))}}
+  const act={pect:0.1,delt:0.35,tri:0.1,abs:0.9+0.1*w,quad:0.55,lat:0.15,bic:0.05,trap:0.1,glute:0.2};
+  return {fr,arms,legs:{h:a+b,k:0},head:{f:0.03,u:0},act,elev:0,cam:V(0,0.25,-0.25),scene:"floorWide"};
+}
+function poseSplit(t){
+  const l=0.1+0.08*t,U=V(0,Math.cos(l),Math.sin(l)),F=V(0,-Math.sin(l),Math.cos(l));
+  const O=V(0,lerp(0.82,0.5,t),-0.06),fr=frame(O,U,F),arms={};
+  for(const s of[-1,1]){const S=fr.P(s*SH_R,SH_U,-0.01),E=add(S,V(s*0.03,-UA*0.99,0.03)),W=add(E,V(s*0.01,-FA*0.98,0.05));arms[s]={S,E,W,H:add(W,V(0,-0.09,0.01))}}
+  const legIK={};
+  for(const s of[-1,1]){const Hj=fr.P(s*HIP_R,HIP_U,0),front=s===1;
+    const A=front?V(s*0.11,0.08,0.42):V(s*0.11,0.53,-0.55),pole=front?V(0,0.1,1):V(0,-1,0.35);
+    const r=ik(Hj,A,THIGH,SHIN,pole);
+    const T=front?add(A,V(0,-0.06,0.15)):add(A,V(0,-0.05,-0.16)),Heel=front?add(A,V(0,-0.07,-0.05)):add(A,V(0,0.03,0.04));
+    legIK[s]={Hj,K:r.E,A:r.W,T,Heel}}
+  const act={pect:0.05,delt:0.05,tri:0.05,abs:0.5,quad:0.3+0.7*t,lat:0.1,bic:0.05,trap:0.15,glute:0.3+0.7*t};
+  return {fr,arms,legs:{h:0,k:0},legIK,head:{f:0.03,u:0},act,elev:0,cam:V(0,0.75,-0.05),scene:"chair"};
 }
 function posePull(t){ // t: 0 unten (toter Hang), 1 oben
   const Y=2.25,al=0.13*t,U=V(0,Math.cos(al),-Math.sin(al)),F=V(0,Math.sin(al),Math.cos(al));
@@ -69,7 +90,7 @@ function posePull(t){ // t: 0 unten (toter Hang), 1 oben
     const r=ik(S,T,UA,FA,pole);arms[s]={S,E:r.E,W:r.W,H:add(r.W,V(0,0.06,-0.02)),Hs:V(s,0,0)};
   }
   const act={pect:0.15,delt:0.15,tri:0.15,abs:0.45,quad:0.1,lat:0.3+0.7*t,bic:0.3+0.7*t,trap:0.25+0.65*t};
-  return {fr,arms,legs:{h:0.18,k:0.55},head:{f:0.03,u:0.0,up:0.25*t},act,elev,cam:V(0,1.6,0),scene:"bar",bar:Y};
+  act.glute=0.2;return {fr,arms,legs:{h:0.18,k:0.55},head:{f:0.03,u:0.0,up:0.25*t},act,elev,cam:V(0,1.6,0),scene:"bar",bar:Y};
 }
 const EX={
   push:{name:"Liegestütze",pose:posePush,timing:[[0,0,0.4],[0,1,2.0],[1,1,0.3],[1,0,1.0]],
@@ -77,7 +98,13 @@ const EX={
     labels:["lws","bws","pect","tri","abs","scap"]},
   pull:{name:"Klimmzüge",pose:posePull,timing:[[0,0,0.6],[0,1,1.2],[1,1,0.4],[1,0,2.0]],
     cues:["Start aus dem toten Hang, Arme gestreckt.","Zuerst die Schulterblätter nach unten ziehen, dann die Arme beugen.","Hoch, bis das Kinn über der Stange ist.","Lendenwirbelsäule neutral, kein Schwung aus Beinen oder Hüfte."],
-    labels:["lws","bws","lat","bic","trap","scap"]}
+    labels:["lws","bws","lat","bic","trap","scap"]},
+  pushElev:{name:"Füße erhöht",pose:posePushElev,timing:[[0,0,0.4],[0,1,2.0],[1,1,0.3],[1,0,1.0]],
+    cues:["Füße auf Stuhl oder Bett, Körper trotzdem gerade.","Lendenwirbelsäule neutral, die Hüfte hängt nicht durch.","Ellbogen etwa 45° vom Körper."],labels:["lws","pect","tri","abs"]},
+  hollow:{name:"Hollow Hold",pose:poseHollow,timing:[[0,1,1.6],[1,0,1.6]],
+    cues:["Lendenwirbelsäule fest auf den Boden drücken.","Schultern und gestreckte Beine leicht anheben.","Ruhig weiteratmen und halten."],labels:["lws","abs","bws"]},
+  split:{name:"Split Squats",pose:poseSplit,timing:[[0,0,0.4],[0,1,1.8],[1,1,0.3],[1,0,1.1]],
+    cues:["Hinterer Fuß auf dem Stuhl, vorderer weit genug vorn.","Senkrecht runter, vorderes Knie bleibt über dem Fuß.","Über die Ferse hochdrücken."],labels:["lws","quad","glute"]}
 };
 function phaseAt(ex,time){
   const tm=EX[ex].timing,total=tm.reduce((s,x)=>s+x[2],0);let t=time%total;
@@ -116,9 +143,10 @@ function build(p){
   for(const s of[-1,1]){
     const Hj=P(s*HIP_R,HIP_U,0),h=p.legs.h,k=p.legs.k;
     const d1=add(mul(U,-Math.cos(h)),mul(F,Math.sin(h))),d2=add(mul(U,-Math.cos(h-k)),mul(F,Math.sin(h-k)));
-    const K=add(Hj,mul(d1,THIGH)),A=add(K,mul(d2,SHIN)),fd=nrm(add(mul(F,Math.cos(h-k)),mul(U,Math.sin(h-k))));
-    const T=add(A,add(mul(fd,FOOT),mul(d2,0.05))),Heel=add(A,add(mul(fd,-0.05),mul(d2,0.06)));
+    let K=add(Hj,mul(d1,THIGH)),A=add(K,mul(d2,SHIN)),fd=nrm(add(mul(F,Math.cos(h-k)),mul(U,Math.sin(h-k))));
+    let T=add(A,add(mul(fd,FOOT),mul(d2,0.05))),Heel=add(A,add(mul(fd,-0.05),mul(d2,0.06)));
     legs[s]={Hj,K,A,T,Heel};
+    if(p.legIK){legs[s]=p.legIK[s];({K,A,T,Heel}=legs[s])}
     limb(Hj,K,0.085,0.055,F,5,0.008);limb(K,A,0.052,0.034,F,5,0.012);limb(Heel,T,0.04,0.03,d2,2);
   }
   /* ----- Skelett ----- */
@@ -180,6 +208,8 @@ function build(p){
     for(let i=0;i<7;i++){const o=i<5?P(s*0.01,0.30-i*0.06,-0.08):P(s*(0.06+(i-5)*0.04),0.07,-0.07);fib(o,latIns,0.04,nrm(add(mul(F,-1),mul(R,s*0.6))),A.lat)}
     // Trapezius (mittel/unten)
     for(let i=0;i<5;i++)fib(P(s*0.005,0.52-i*0.06,-0.085),P(s*0.15,0.49+(p.elev||0),-0.07),0.015,mul(F,-1),A.trap);
+    // Gesäß
+    for(let i=0;i<4;i++)fib(P(s*(0.03+i*0.03),0.06-i*0.02,-0.07),add(legs[s].Hj,add(mul(R,s*0.05),mul(F,-0.02))),0.04,nrm(add(mul(F,-1),mul(R,s*0.5))),A.glute||0);
     // Quadrizeps
     const g=legs[s];for(let i=0;i<3;i++)fib(add(P(s*(0.07+i*0.025),-0.02,0.05),V(0,0,0)),add(g.K,mul(F,0.04)),0.04,nrm(add(F,mul(R,s*(i-1)*0.4))),A.quad);
   }
@@ -190,7 +220,7 @@ function build(p){
   L.labels={lws:[P(0,0.13,-0.05),"Lendenwirbelsäule"],bws:[P(0,0.40,-0.085),"Brustwirbelsäule"],pect:[P(0.09,0.43,0.12),"Brustmuskel"],
     tri:[add(lerpV(a1.S,a1.E,0.55),mul(nrm(sub(a1.E,lerpV(a1.S,a1.W,.5))),0.05)),"Trizeps"],abs:[P(0,0.12,0.13),"Bauchmuskeln"],
     scap:[P(0.11,0.42,-0.11),"Schulterblatt"],lat:[P(0.13,0.22,-0.09),"Breiter Rückenmuskel"],
-    bic:[add(lerpV(a1.S,a1.E,0.5),mul(nrm(sub(a1.E,lerpV(a1.S,a1.W,.5))),-0.05)),"Bizeps"],trap:[P(0.06,0.47,-0.11),"Trapezmuskel"]};
+    bic:[add(lerpV(a1.S,a1.E,0.5),mul(nrm(sub(a1.E,lerpV(a1.S,a1.W,.5))),-0.05)),"Bizeps"],trap:[P(0.06,0.47,-0.11),"Trapezmuskel"],quad:[lerpV(legs[1].Hj,legs[1].K,0.5),"Oberschenkel vorn"],glute:[P(0.09,-0.02,-0.1),"Gesäß"]};
   return L;
 }
 
@@ -210,8 +240,64 @@ const css=`
 .p3 .cues{padding:10px 16px calc(14px + env(safe-area-inset-bottom));border-top:1px solid var(--line);font-size:14px;max-height:26vh;overflow:auto}
 .p3 .cues ol{margin:4px 0 0;padding-left:18px}.p3 .cues li{margin:3px 0}
 .p3 .legend{display:flex;gap:12px;font-size:12px;color:var(--mute);margin-bottom:4px;flex-wrap:wrap}
+.m3{position:relative;height:230px;border:1px solid var(--line);border-radius:12px;overflow:hidden;touch-action:none;margin:4px 0 6px;cursor:grab}
+.m3 canvas{position:absolute;inset:0;width:100%;height:100%}
+.m3x{position:absolute;right:8px;top:8px;border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:5px 9px;font-size:12px;font-weight:650;color:var(--ink)}
+.m3h{position:absolute;left:10px;bottom:7px;font-size:11px;color:var(--mute);pointer-events:none}
 .p3 .legend i{display:inline-block;width:14px;height:3px;border-radius:2px;vertical-align:3px;margin-right:5px}
 `;
+const DEF={push:[-1.15,0.18,2.15],pushElev:[-1.15,0.2,2.35],pull:[-0.55,0.15,2.7],hollow:[-1.25,0.3,2.2],split:[-1.15,0.15,2.3]};
+const getColors=()=>{const cs=getComputedStyle(document.documentElement);const g=n=>cs.getPropertyValue(n).trim()||"#000";return {ink:g("--ink"),mute:g("--mute"),line:g("--line"),bg:g("--bg"),lws:g("--kraft"),mus:"#E5484D"}};
+function mount3D(el,ex){
+  if(!document.getElementById("p3css")){const s=document.createElement("style");s.id="p3css";s.textContent=css;document.head.appendChild(s)}
+  el.classList.add("m3");el.innerHTML='<canvas></canvas><button class="m3x" aria-label="Groß ansehen">Vollbild</button><span class="m3h">Ziehen zum Drehen</span>';
+  const cv=el.querySelector("canvas"),ctx=cv.getContext("2d"),d=DEF[ex]||DEF.push;
+  const st={ex,time:0,playing:true,speed:1,yaw:d[0],pitch:d[1],dist:d[2]*1.05,layers:{outline:1,skel:1,muscle:1,labels:1},labelKeys:["lws"]};
+  let W=0,H=0,C=getColors(),moved=0,startX=0,startY=0,drag=null;
+  const rs=()=>{const r=el.getBoundingClientRect(),dpr=Math.min(2,devicePixelRatio||1);W=r.width;H=r.height;cv.width=W*dpr;cv.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0)};rs();
+  const ro=new ResizeObserver(rs);ro.observe(el);
+  el.addEventListener("pointerdown",e=>{if(e.target.closest(".m3x"))return;drag=[e.clientX,e.clientY];startX=e.clientX;startY=e.clientY;moved=0;el.setPointerCapture(e.pointerId)});
+  el.addEventListener("pointermove",e=>{if(!drag)return;st.yaw-=(e.clientX-drag[0])*0.009;st.pitch=clamp(st.pitch+(e.clientY-drag[1])*0.006,-1.2,1.35);moved+=Math.abs(e.clientX-drag[0])+Math.abs(e.clientY-drag[1]);drag=[e.clientX,e.clientY]});
+  el.addEventListener("pointerup",()=>{if(drag&&moved<6)st.playing=!st.playing;drag=null});
+  el.querySelector(".m3x").addEventListener("click",()=>open3D(ex));
+  let last=performance.now();
+  (function loop(now){if(!el.isConnected){ro.disconnect();return}const dt=Math.min(0.05,(now-last)/1000);last=now;if(st.playing)st.time+=dt;C=getColors();drawScene(ctx,W,H,st,C);requestAnimationFrame(loop)})(last);
+}
+function drawScene(ctx,W,H,st,C){
+  const ph=phaseAt(st.ex,st.time),pose=EX[st.ex].pose(ph),M=build(pose);
+    ctx.clearRect(0,0,W,H);
+    const tgt=pose.cam,cp=Math.cos(st.pitch);
+    const pos=add(tgt,mul(V(cp*Math.sin(st.yaw),Math.sin(st.pitch),cp*Math.cos(st.yaw)),st.dist));
+    const fw=nrm(sub(tgt,pos)),rt=nrm(cross(fw,V(0,1,0))),cu=cross(rt,fw),fpx=Math.min(W,H*0.8)*1.35;
+    const proj=q=>{const d=sub(q,pos),z=dot(d,fw);if(z<0.05)return null;return [W/2+dot(d,rt)/z*fpx,H*0.5-dot(d,cu)/z*fpx,z]};
+    const fog=z=>clamp(1.15-(z-(st.dist-0.6))/1.6,0.25,1);
+    const poly=(pts,col,w,alpha)=>{let pr=null;ctx.strokeStyle=col;ctx.lineWidth=w;
+      for(const q of pts){const s=proj(q);if(s&&pr){ctx.globalAlpha=alpha*fog((s[2]+pr[2])/2);ctx.beginPath();ctx.moveTo(pr[0],pr[1]);ctx.lineTo(s[0],s[1]);ctx.stroke()}pr=s}};
+    ctx.lineCap="round";ctx.lineJoin="round";
+    // Umgebung
+    const grid=(x0,x1,z0,z1,y=0)=>{for(let x=x0;x<=x1+1e-4;x+=0.25)poly([V(x,y,z0),V(x,y,z1)],C.line,1,0.9);for(let z=z0;z<=z1+1e-4;z+=0.25)poly([V(x0,y,z),V(x1,y,z)],C.line,1,0.9)};
+    const box=(x0,x1,y0,y1,z0,z1,col)=>{const c=[[x0,y0,z0],[x1,y0,z0],[x1,y0,z1],[x0,y0,z1],[x0,y1,z0],[x1,y1,z0],[x1,y1,z1],[x0,y1,z1]].map(a=>V(...a));
+      [[0,1],[1,2],[2,3],[3,0],[4,5],[5,6],[6,7],[7,4],[0,4],[1,5],[2,6],[3,7]].forEach(([a,b])=>poly([c[a],c[b]],col,1.2,0.8))};
+    if(pose.scene==="floorWide"){grid(-1,1,-1.6,1.2)}
+    else if(pose.scene==="chair"){grid(-1,1,-1.2,1.2);box(-0.25,0.25,0,0.47,-0.8,-0.38,C.mute)}
+    else if(pose.scene==="chairFeet"){grid(-1,1,-0.8,1.9);box(-0.3,0.3,0,pose.hf,-0.45,0.05,C.mute)}
+    else if(pose.scene==="floor"){for(let x=-1;x<=1.0001;x+=0.25)poly([V(x,0,-0.3),V(x,0,1.9)],C.line,1,0.9);for(let z=-0.3;z<=1.9001;z+=0.25)poly([V(-1,0,z),V(1,0,z)],C.line,1,0.9)}
+    else{const Y=pose.bar;for(let x=-1;x<=1.0001;x+=0.25)poly([V(x,0,-0.9),V(x,0,0.9)],C.line,1,0.9);for(let z=-0.9;z<=0.9001;z+=0.25)poly([V(-1,0,z),V(1,0,z)],C.line,1,0.9);
+      poly([V(-0.75,Y,0),V(0.75,Y,0)],C.ink,3,1);poly([V(-0.75,0,0),V(-0.75,Y,0)],C.mute,2,0.8);poly([V(0.75,0,0),V(0.75,Y,0)],C.mute,2,0.8)}
+    if(st.layers.outline)for(const l of M.outline)poly(l,C.mute,0.8,0.45);
+    if(st.layers.skel){for(const l of M.skel)poly(l,C.ink,1.3,0.9);for(const l of M.lws)poly(l,C.lws,1.8,1);
+      for(const j of M.joints){const s=proj(j);if(s){ctx.globalAlpha=fog(s[2]);ctx.fillStyle=C.bg;ctx.strokeStyle=C.ink;ctx.lineWidth=1.3;ctx.beginPath();ctx.arc(s[0],s[1],3.2,0,7);ctx.fill();ctx.stroke()}}}
+    if(st.layers.muscle)for(const m of M.muscle)poly(m.pts,C.mus,1.1+1.2*m.act,0.15+0.85*m.act);
+    if(st.layers.labels){ctx.font="600 12px "+getComputedStyle(document.body).fontFamily;ctx.textBaseline="middle";
+      const used=[];for(const k of (st.labelKeys||EX[st.ex].labels)){const [q,txt]=M.labels[k],s=proj(q);if(!s)continue;
+        if(k==="lws"&&!st.layers.skel||!["lws","bws","scap"].includes(k)&&!st.layers.muscle)continue;
+        const tw0=ctx.measureText(txt).width;let right=s[0]<W*0.62;if(right&&s[0]+50+tw0>W-6)right=false;if(!right&&s[0]-50-tw0<6)right=true;let lx=right?s[0]+46:s[0]-46,ly=s[1]-18;while(used.some(u=>Math.abs(u-ly)<16))ly+=16;used.push(ly);
+        const col=k==="lws"?C.lws:(k==="bws"||k==="scap")?C.ink:C.mus;
+        ctx.globalAlpha=1;ctx.strokeStyle=col;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(s[0],s[1]);ctx.lineTo(lx,ly);ctx.stroke();
+        ctx.beginPath();ctx.arc(s[0],s[1],2.5,0,7);ctx.fillStyle=col;ctx.fill();
+        const tw=ctx.measureText(txt).width,tx=right?lx+4:lx-4-tw;ctx.fillStyle=C.bg;ctx.globalAlpha=0.85;ctx.fillRect(tx-3,ly-9,tw+6,18);ctx.globalAlpha=1;ctx.fillStyle=col;ctx.fillText(txt,tx,ly)}}
+  ctx.globalAlpha=1;
+}
 function open3D(ex){
   if(!document.getElementById("p3css")){const st=document.createElement("style");st.id="p3css";st.textContent=css;document.head.appendChild(st)}
   const root=document.createElement("div");root.className="p3";root.setAttribute("role","dialog");root.setAttribute("aria-label","3D-Ansicht");
@@ -227,7 +313,7 @@ function open3D(ex){
   const st={ex:EX[ex]?ex:"push",time:0,playing:true,speed:1,yaw:-1.0,pitch:0.22,dist:2.15,layers:{outline:1,skel:1,muscle:1,labels:1}};
   window.__p3st=st;
   const views={side:[-Math.PI/2,0.06],front:[0,0.12],iso:[-1.0,0.22],top:[-Math.PI/2,1.3]};
-  function setEx(k){st.ex=k;st.time=0;st.dist=k==="pull"?2.7:2.15;
+  function setEx(k){st.ex=k;st.time=0;const d=DEF[k]||DEF.push;st.yaw=d[0];st.pitch=d[1];st.dist=d[2];
     root.querySelectorAll("[data-ex]").forEach(b=>b.classList.toggle("on",b.dataset.ex===k));
     root.querySelector(".cl").innerHTML=EX[k].cues.map(c=>`<li>${c}</li>`).join("")}
   setEx(st.ex);
@@ -256,38 +342,12 @@ function open3D(ex){
   let last=performance.now(),raf=0;
   function frameLoop(now){
     const dt=Math.min(0.05,(now-last)/1000);last=now;if(st.playing)st.time+=dt*st.speed;
-    const ph=phaseAt(st.ex,st.time),pose=EX[st.ex].pose(ph),M=build(pose);
-    ctx.clearRect(0,0,W,H);
-    const tgt=pose.cam,cp=Math.cos(st.pitch);
-    const pos=add(tgt,mul(V(cp*Math.sin(st.yaw),Math.sin(st.pitch),cp*Math.cos(st.yaw)),st.dist));
-    const fw=nrm(sub(tgt,pos)),rt=nrm(cross(fw,V(0,1,0))),cu=cross(rt,fw),fpx=Math.min(W,H*0.8)*1.35;
-    const proj=q=>{const d=sub(q,pos),z=dot(d,fw);if(z<0.05)return null;return [W/2+dot(d,rt)/z*fpx,H*0.5-dot(d,cu)/z*fpx,z]};
-    const fog=z=>clamp(1.15-(z-(st.dist-0.6))/1.6,0.25,1);
-    const poly=(pts,col,w,alpha)=>{let pr=null;ctx.strokeStyle=col;ctx.lineWidth=w;
-      for(const q of pts){const s=proj(q);if(s&&pr){ctx.globalAlpha=alpha*fog((s[2]+pr[2])/2);ctx.beginPath();ctx.moveTo(pr[0],pr[1]);ctx.lineTo(s[0],s[1]);ctx.stroke()}pr=s}};
-    ctx.lineCap="round";ctx.lineJoin="round";
-    // Umgebung
-    if(pose.scene==="floor"){for(let x=-1;x<=1.0001;x+=0.25)poly([V(x,0,-0.3),V(x,0,1.9)],C.line,1,0.9);for(let z=-0.3;z<=1.9001;z+=0.25)poly([V(-1,0,z),V(1,0,z)],C.line,1,0.9)}
-    else{const Y=pose.bar;for(let x=-1;x<=1.0001;x+=0.25)poly([V(x,0,-0.9),V(x,0,0.9)],C.line,1,0.9);for(let z=-0.9;z<=0.9001;z+=0.25)poly([V(-1,0,z),V(1,0,z)],C.line,1,0.9);
-      poly([V(-0.75,Y,0),V(0.75,Y,0)],C.ink,3,1);poly([V(-0.75,0,0),V(-0.75,Y,0)],C.mute,2,0.8);poly([V(0.75,0,0),V(0.75,Y,0)],C.mute,2,0.8)}
-    if(st.layers.outline)for(const l of M.outline)poly(l,C.mute,0.8,0.45);
-    if(st.layers.skel){for(const l of M.skel)poly(l,C.ink,1.3,0.9);for(const l of M.lws)poly(l,C.lws,1.8,1);
-      for(const j of M.joints){const s=proj(j);if(s){ctx.globalAlpha=fog(s[2]);ctx.fillStyle=C.bg;ctx.strokeStyle=C.ink;ctx.lineWidth=1.3;ctx.beginPath();ctx.arc(s[0],s[1],3.2,0,7);ctx.fill();ctx.stroke()}}}
-    if(st.layers.muscle)for(const m of M.muscle)poly(m.pts,C.mus,1.1+1.2*m.act,0.15+0.85*m.act);
-    if(st.layers.labels){ctx.font="600 12px "+getComputedStyle(document.body).fontFamily;ctx.textBaseline="middle";
-      const used=[];for(const k of EX[st.ex].labels){const [q,txt]=M.labels[k],s=proj(q);if(!s)continue;
-        if(k==="lws"&&!st.layers.skel||(k==="pect"||k==="tri"||k==="bic"||k==="lat"||k==="abs"||k==="trap")&&!st.layers.muscle)continue;
-        const right=s[0]<W*0.62;let lx=right?s[0]+46:s[0]-46,ly=s[1]-18;while(used.some(u=>Math.abs(u-ly)<16))ly+=16;used.push(ly);
-        const col=k==="lws"?C.lws:(k==="bws"||k==="scap")?C.ink:C.mus;
-        ctx.globalAlpha=1;ctx.strokeStyle=col;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(s[0],s[1]);ctx.lineTo(lx,ly);ctx.stroke();
-        ctx.beginPath();ctx.arc(s[0],s[1],2.5,0,7);ctx.fillStyle=col;ctx.fill();
-        const tw=ctx.measureText(txt).width,tx=right?lx+4:lx-4-tw;ctx.fillStyle=C.bg;ctx.globalAlpha=0.85;ctx.fillRect(tx-3,ly-9,tw+6,18);ctx.globalAlpha=1;ctx.fillStyle=col;ctx.fillText(txt,tx,ly)}}
-    ctx.globalAlpha=1;raf=requestAnimationFrame(frameLoop);
+    drawScene(ctx,W,H,st,C);raf=requestAnimationFrame(frameLoop);
   }
   raf=requestAnimationFrame(frameLoop);
   const mq=matchMedia("(prefers-color-scheme: dark)"),onTheme=()=>{C=colors()};mq.addEventListener("change",onTheme);
   const mo=new MutationObserver(onTheme);mo.observe(document.documentElement,{attributes:true,attributeFilter:["data-theme"]});
   function close(){cancelAnimationFrame(raf);ro.disconnect();mo.disconnect();mq.removeEventListener("change",onTheme);document.removeEventListener("keydown",onKey);root.remove();document.body.style.overflow=""}
 }
-window.open3D=open3D;
+window.open3D=open3D;window.mount3D=mount3D;
 })();

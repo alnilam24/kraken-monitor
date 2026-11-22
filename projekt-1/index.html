@@ -318,15 +318,18 @@ INFO["Krafttest"]={w:"Alle acht Wochen misst du am Mittwoch in etwa 15 Minuten, 
 INFO["5-km-Test"]={w:"Alle acht Wochen läufst du 5 km auf Zeit. Daraus berechnet die App deine Laufgeschwindigkeiten neu.",s:["Flache Strecke oder Bahn, am besten immer dieselbe.","15 min locker einlaufen, dabei 3 Steigerungen über 15–20 Sekunden.","5 km so schnell, wie du gleichmäßig durchhältst. Der erste Kilometer nicht schneller als der Rest.","10 min locker auslaufen.","Unten Distanz, Zeit und Puls eintragen und Art „5-km-Test“ lassen."],t:"Am Vortag ist Ruhe oder nur Krafttraining, also bist du ausgeruht."};
 INFO["Rucksack-Gewicht"]={w:"Der Rucksack ersetzt die Hantel. Bei jeder Übung zeigt die App, wie viel Gewicht diese Woche ungefähr hinein soll. Der Wert steigt mit den Wochen automatisch.",s:["Rucksack einmal leer und einmal gepackt auf die Personenwaage stellen, oder dich mit und ohne Rucksack wiegen. Die Differenz ist das Gewicht.","Füllen mit Wasserflaschen (1 l = 1 kg), Büchern oder einer Tüte Reis (1 kg). Alles fest packen, damit nichts rutscht.","Hüft- und Brustgurt schließen, das Gewicht soll eng am Rücken liegen.","Fang am unteren Ende des Bereichs an. Schaffst du in allen Sätzen die obere Wiederholungszahl, beim nächsten Mal 1–2 kg mehr.","Schaffst du die untere Wiederholungszahl nicht sauber, nimm 1–2 kg raus. Die Wiederholungen sind wichtiger als die Zahl auf dem Rucksack."],t:"Bei Füßen erhöht und Deficit-Liegestützen ist weniger Gewicht nötig, weil die Übung schon schwerer ist. Das ist im Wert schon eingerechnet."};
 function infoBtn(k){return INFO[k]?`<button class="info" data-info="${esc(k)}" aria-label="Erklärung zu ${esc(k)}">i</button>`:""}
+const INFO3D={"Liegestütze, Füße erhöht, mit Rucksack":"pushElev","Liegestütze mit Rucksack":"push","Klimmzüge mit Rucksack (Schule)":"pull","Klimmzüge am Reck oder Tisch-Rudern":"pull","Hollow Hold":"hollow","Bulgarische Split Squats mit Rucksack":"split","Krafttest":"push"};
+function load3D(cb){if(window.mount3D)return cb();const sc=document.createElement("script");sc.src="anim3d.js";sc.onload=cb;document.head.appendChild(sc)}
 function openInfo(k){
   const i=INFO[k];if(!i)return;
   const bg=document.createElement("div");bg.className="sheet-bg";
-  bg.innerHTML=`<div class="sheet" role="dialog" aria-modal="true" aria-label="${esc(k)}"><div class="grab"></div><h3>${esc(k)}</h3><p class="what">${esc(i.w)}</p><h4>So geht's</h4><ol>${i.s.map(x=>`<li>${esc(x)}</li>`).join("")}</ol>${i.t?`<h4>Tipp</h4><p style="margin:4px 0 0">${esc(i.t)}</p>`:""}<button class="btn ghost close">Schließen</button></div>`;
+  bg.innerHTML=`<div class="sheet" role="dialog" aria-modal="true" aria-label="${esc(k)}"><div class="grab"></div><h3>${esc(k)}</h3>${INFO3D[k]?'<div class="anim3d"></div>':""}<p class="what">${esc(i.w)}</p><h4>So geht's</h4><ol>${i.s.map(x=>`<li>${esc(x)}</li>`).join("")}</ol>${i.t?`<h4>Tipp</h4><p style="margin:4px 0 0">${esc(i.t)}</p>`:""}<button class="btn ghost close">Schließen</button></div>`;
   const close=()=>{bg.classList.remove("open");setTimeout(()=>bg.remove(),200);document.removeEventListener("keydown",esc_)};
   const esc_=e=>{if(e.key==="Escape")close()};
   bg.addEventListener("click",e=>{if(e.target===bg||e.target.closest(".close"))close()});
   document.addEventListener("keydown",esc_);
-  document.body.appendChild(bg);requestAnimationFrame(()=>bg.classList.add("open"));bg.querySelector(".close").focus();
+  document.body.appendChild(bg);requestAnimationFrame(()=>bg.classList.add("open"));
+  const slot=bg.querySelector(".anim3d");if(slot)load3D(()=>window.mount3D(slot,INFO3D[k]));bg.querySelector(".close").focus({preventScroll:true});
 }
 function runFor(w,type){
   const P=paces(),dl=isDeload(w),ph=w<=4?0:w<=16?1:w<=36?2:3;
@@ -494,7 +497,7 @@ function vHeute(){
         <div><label for="tp">Liegestütze (${kg})</label><input id="tp" inputmode="numeric" placeholder="Wdh."></div>
         <div><label for="tk">Rucksack (kg)</label><input id="tk" inputmode="decimal" placeholder="0"></div>
         <div class="full"><label for="tq">Klimmzüge (Wdh.)</label><input id="tq" inputmode="numeric" placeholder="Wdh."></div></div>
-        <div class="btnrow"><button class="btn ghost" data-3d="push">Liegestütze in 3D</button><button class="btn ghost" data-3d="pull">Klimmzüge in 3D</button></div></div></div></div>`;
+</div></div></div>`;
     }else if(it.kind==="swim"){
       h+=`<div class="sec unit" data-u="${u}"><div class="group side t-swim"><div class="item"><div class="top"><span class="name">Schwimmen am Abend <span class="opt">optional</span></span>${cb}</div><p>Zweimal pro Woche reicht, am besten Montag und Samstag. Zählt nicht zum Pflichtprogramm.</p></div></div></div>`;
     }else{
