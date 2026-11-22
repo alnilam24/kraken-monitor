@@ -84,7 +84,9 @@ ol,ul{padding-left:20px;margin:6px 0}li{margin:4px 0}
 /* ---------- Speicher ---------- */
 const KEY="projekt1.v1";
 function load(){try{return JSON.parse(localStorage.getItem(KEY))||{}}catch(e){return {}}}
+const DEFAULT_START="2026-11-23";
 let S=Object.assign({start:null,test5k:null,logs:{weight:[],run5k:[],push:[],pull:[]},done:{},sets:{}},load());
+if(!S.start)S.start=DEFAULT_START;
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
 
 /* ---------- Datum ---------- */
@@ -113,7 +115,7 @@ function strengthPhase(w){
   return {name:"Spezifisch",ruck:"1× pro Woche echtes Bankdrücken mit Langhantel statt Einheit A",aReps:"5–8"};
 }
 const KRAFT={
- A:{name:"Kraft A – schwer",ex:[
+ A:{name:"Kraft A – schwer (ca. 40 min)",ex:[
   ["Liegestütze, Füße erhöht, mit Rucksack",4,"6–12","2 min"],
   ["Dips zwischen zwei Stühlen (später mit Rucksack)",3,"6–12","2 min"],
   ["Bulgarische Split Squats mit Rucksack",3,"8–12/Bein","90 s"],
@@ -128,9 +130,9 @@ const KRAFT={
  C:{name:"Kraft C – Volumen",ex:[
   ["Liegestütze mit Rucksack",3,"12–20","90 s"],
   ["Dips",3,"Max − 2","90 s"],
-  ["Klimmzüge Ristgriff (Schule)",3,"Max − 2","2 min"],
+  ["Klimmzüge (Spielplatz-Reck) oder Tisch-Rudern",3,"Max − 2","2 min"],
   ["Ausfallschritte gehend mit Rucksack",3,"12/Bein","90 s"],
-  ["Hängendes Knieheben (Schule)",3,"10–15","60 s"],
+  ["Hängendes Knieheben oder liegendes Beinheben",3,"10–15","60 s"],
   ["Einbeiniges Wadenheben an Stufe",3,"15/Bein","60 s"]]},
  BANK:{name:"Bankdrücken (Langhantel)",ex:[
   ["Bankdrücken, mit Partner absichern",4,"5–8","2–3 min"],
@@ -165,13 +167,13 @@ function dayPlan(d){
   const items=[];
   const kraft=(k)=>{let key=k; if(k==="A"&&w>=37) key="BANK"; items.push({kind:"kraft",key,title:KRAFT[key].name,dl})};
   switch(wd){
-    case 1: kraft("A"); items.push({kind:"info",title:"Schwimmen",d:"Deine eigene Einheit"}); break;
+    case 1: kraft("A"); items.push({kind:"info",title:"Schwimmen abends",d:"Wenn du gehst. 2× pro Woche reicht (Mo und Sa)."}); break;
     case 2: items.push(Object.assign({kind:"run"},runFor(w,"int"))); break;
-    case 3: kraft("B"); {const r=runFor(w,"easy"); if(r) items.push(Object.assign({kind:"run"},r));} break;
-    case 4: items.push(Object.assign({kind:"run"},runFor(w,"tempo"))); break;
-    case 5: kraft("C"); items.push({kind:"info",title:"Schwimmen",d:"Deine eigene Einheit"}); break;
-    case 6: items.push(Object.assign({kind:"run"},runFor(w,"long"))); break;
-    case 0: items.push({kind:"rest",title:"Ruhetag",d:"Höchstens Spaziergang. Schlaf ist heute Training."}); break;
+    case 3: items.push({kind:"rest",title:"Ruhetag",d:"Optional lockeres Schwimmen abends, sonst frei."}); break;
+    case 4: kraft("B"); {const r=runFor(w,"easy"); if(r) items.push(Object.assign({kind:"run"},r));} break;
+    case 5: items.push(Object.assign({kind:"run"},runFor(w,"tempo"))); break;
+    case 6: kraft("C"); items.push({kind:"info",title:"Schwimmen abends",d:"Wenn du gehst. Kraft C am besten vormittags."}); break;
+    case 0: items.push(Object.assign({kind:"run"},runFor(w,"long"))); break;
   }
   return {w,dl,sp,items};
 }
@@ -214,8 +216,10 @@ function exList(key,dateKey,dl){
 
 function vHeute(){
   if(!S.start) return vSetup();
-  const d=new Date(); const dk=iso(d); const p=dayPlan(d);
-  let h=`<div class="card"><div class="mute">${fmtDate(d)}</div><div class="big">${p.items.map(i=>esc(i.title)).join(" + ")}</div>
+  const d0=new Date(); d0.setHours(0,0,0,0); const pre=d0<parse(S.start);
+  const d=pre?parse(S.start):new Date(); const dk=iso(d); const p=dayPlan(d);
+  let h=pre?`<div class="card"><h2>Start: ${fmtDate(d)}</h2><div class="mute">Heute ist noch frei. So sieht dein erster Trainingstag aus:</div></div>`:"";
+  h+=`<div class="card"><div class="mute">${fmtDate(d)}</div><div class="big">${p.items.map(i=>esc(i.title)).join(" + ")}</div>
     <div>${p.dl?'<span class="pill warn">Entlastung: halbe Sätze</span>':''}<span class="pill acc">Woche ${Math.min(p.w,52)}</span><span class="pill">${esc(p.sp.ruck)}</span></div></div>`;
   for(const it of p.items){
     if(it.kind==="kraft"){
@@ -227,7 +231,7 @@ function vHeute(){
     }
   }
   const isDone=!!S.done[dk];
-  h+=`<button class="btn full ${isDone?"sec":""}" id="dayDone">${isDone?"✓ Erledigt (rückgängig)":"Training erledigt"}</button>`;
+  if(!pre) h+=`<button class="btn full ${isDone?"sec":""}" id="dayDone">${isDone?"✓ Erledigt (rückgängig)":"Training erledigt"}</button>`;
   // Woche
   const mon=mondayOf(d); let wk="";
   for(let i=0;i<7;i++){const x=new Date(mon);x.setDate(mon.getDate()+i);const k=iso(x);
@@ -251,16 +255,16 @@ function vPlan(){
       <tr><td>Tempo</td><td>„angenehm hart“</td><td>${P.tempo}</td></tr>
       <tr><td>Intervall</td><td>hart, schweres Atmen</td><td>${P.interval}</td></tr>
       <tr><td>Ziel 5 km</td><td>unter 23:00</td><td>${P.goal}</td></tr></table></div>`;
-    h+=`<div class="card"><h2>Phasen</h2><table><tr><th>Wochen</th><th>Intervalle (Di)</th><th>Tempo (Do)</th><th>Lang (Sa)</th></tr>
+    h+=`<div class="card"><h2>Phasen</h2><table><tr><th>Wochen</th><th>Intervalle (Di)</th><th>Tempo (Fr)</th><th>Lang (So)</th></tr>
       <tr><td>1–4</td><td>locker 30 min + 6×20 s</td><td>locker</td><td>50–60 min</td></tr>
       <tr><td>5–16</td><td>6–10 × 400 m</td><td>15–20 min</td><td>60–70 min</td></tr>
       <tr><td>17–36</td><td>5–6 × 1000 m</td><td>20–25 min</td><td>70–80 min</td></tr>
       <tr><td>37–52</td><td>3 × 1600 m</td><td>25 min</td><td>60–70 min</td></tr></table>
-      <p class="mute">Mittwoch ab Woche 5: 30–40 min locker. Langen Lauf um höchstens ca. 10 % pro Woche verlängern.</p>
+      <p class="mute">Donnerstag ab Woche 5: 30–40 min locker (nach Kraft B). Langen Lauf um höchstens ca. 10 % pro Woche verlängern.</p>
       <div class="note">Schmerzregel: Wird ein Schmerz beim Laufen schlimmer oder ist er am nächsten Morgen noch da, 3 Tage nicht laufen, stattdessen rudern. Bleibt er: Arzt.</div></div>`;
   }else if(planTab==="woche"){
-    const rows=[["Mo","Kraft A + Schwimmen","Beine nicht bis ans Limit"],["Di","Intervall-Lauf","Wochen 1–4 locker"],["Mi","Kraft B + lockerer Lauf","Lauf ab Woche 5"],["Do","Tempo-Lauf","Wochen 1–4 locker"],["Fr","Kraft C + Schwimmen",""],["Sa","Langer lockerer Lauf","bewusst langsam"],["So","Ruhe","höchstens Spaziergang"]];
-    h+=`<div class="card"><h2>Wochenplan</h2><table>${rows.map(r=>`<tr><td><b>${r[0]}</b></td><td>${r[1]}</td><td class="mute">${r[2]}</td></tr>`).join("")}</table><p class="mute">Zu viel? Zuerst den Mittwochslauf streichen, nie den Ruhetag.</p></div>`;
+    const rows=[["Mo","Kraft A (kompakt) + Schwimmen abends","Klimmzüge in der Schule"],["Di","Intervall-Lauf","viel Zeit · Wochen 1–4 locker"],["Mi","Ruhetag","optional lockeres Schwimmen"],["Do","Kraft B + lockerer Lauf","viel Zeit · Lauf ab Woche 5"],["Fr","Tempo-Lauf","Wochen 1–4 locker"],["Sa","Kraft C + Schwimmen abends","Kraft vormittags"],["So","Langer lockerer Lauf","bewusst langsam"]];
+    h+=`<div class="card"><h2>Wochenplan</h2><table>${rows.map(r=>`<tr><td><b>${r[0]}</b></td><td>${r[1]}</td><td class="mute">${r[2]}</td></tr>`).join("")}</table><p class="mute">Zu viel? Zuerst den Donnerstagslauf streichen, nie den Ruhetag. Schwimmen: 2× pro Woche reicht.</p></div>`;
     h+=`<div class="card"><h2>Die 6 Regeln</h2><ol><li>Jeder Kraftsatz endet 1–2 Wdh. vor dem Versagen.</li><li>~80 % der Laufzeit locker, nur 2 harte Läufe pro Woche.</li><li>Langen Lauf höchstens ca. 10 % pro Woche verlängern.</li><li>Jede 4. Woche Entlastung: halbe Sätze, 30 % weniger Laufen, keine Intervalle.</li><li>0,15–0,3 kg pro Woche zunehmen, 100–130 g Protein am Tag.</li><li>Mindestens 8,5 Stunden Schlaf.</li></ol></div>`;
     h+=`<div class="card"><h2>Sofort Entlastungswoche, wenn …</h2><ul><li>Ruhepuls morgens mehrere Tage 5–10 Schläge höher</li><li>Leistung sinkt 2 Wochen lang</li><li>Dauermüdigkeit oder schlechter Schlaf</li><li>häufig krank</li><li>Gewicht sinkt</li></ul></div>`;
   }else{
@@ -330,21 +334,22 @@ function vFort(){
 /* ---------- Essen ---------- */
 function vEssen(){
   return `<div class="card"><h2>Tagesziele</h2><table>
-   <tr><td>Kalorien</td><td>Start 3.300–3.500 kcal, über die Waage steuern</td></tr>
-   <tr><td>Protein</td><td>100–130 g, auf 4–5 Mahlzeiten</td></tr>
+   <tr><td>Kalorien</td><td>Start ca. 3.300–3.500 kcal, über die Waage steuern</td></tr>
+   <tr><td>Protein</td><td>100–130 g, auf 4–5 Mahlzeiten (aus Fleisch, Käse, Eiern, Hülsenfrüchten)</td></tr>
    <tr><td>Kohlenhydrate</td><td>ca. 350–450 g</td></tr>
    <tr><td>Fett</td><td>ca. 70–100 g</td></tr>
    <tr><td>Trinken</td><td>2,5–3,5 l</td></tr></table></div>
-  <div class="card"><h2>Beispieltag (~3.600 kcal)</h2><table>
+  <div class="card"><h2>Beispieltag ohne Milch und Joghurt (~3.500 kcal, ~160 g Protein)</h2><table>
    <tr><th>Mahlzeit</th><th>Was</th><th>kcal</th></tr>
-   <tr><td>Frühstück</td><td>100 g Haferflocken, 400 ml Vollmilch, Banane, 1 EL Erdnussbutter</td><td>850</td></tr>
-   <tr><td>Schule</td><td>2 Vollkornbrötchen mit Käse und Pute, Apfel</td><td>600</td></tr>
-   <tr><td>Mittag</td><td>125 g Reis (roh), 150 g Hähnchen oder Linsen, Gemüse mit Öl</td><td>750</td></tr>
-   <tr><td>Nach Training</td><td>300 ml Kakao, 50 g Müsli, Obst</td><td>450</td></tr>
-   <tr><td>Abend</td><td>3 Eier, 3 Scheiben Vollkornbrot mit Butter, Gemüse</td><td>650</td></tr>
-   <tr><td>Vor dem Schlafen</td><td>250 g Magerquark oder Skyr, 30 g Nüsse</td><td>330</td></tr></table></div>
-  <div class="card"><h2>Steuerung</h2><ol><li>3–4× pro Woche morgens wiegen (unter „Fortschritt“ eintragen).</li><li>Unter +0,15 kg/Woche: 200–300 kcal mehr.</li><li>Über +0,4 kg/Woche (2 Wochen lang): 200 kcal weniger.</li></ol>
-  <p class="mute">Kein Hunger? Kalorien trinken (Milch, Kakao, Smoothie mit Haferflocken), Nüsse und Käse als Snacks.</p>
+   <tr><td>Frühstück</td><td>100 g Haferflocken mit 300 ml Dinkel-Mandelmilch, Banane, 2 EL Erdnussbutter</td><td>800</td></tr>
+   <tr><td>Schule</td><td>2 Vollkornbrötchen mit Käse und Schinken oder Pute, Apfel</td><td>650</td></tr>
+   <tr><td>Mittag</td><td>125 g Reis oder Nudeln (roh), 150–180 g Hähnchen oder Rind, Gemüse mit Öl</td><td>800</td></tr>
+   <tr><td>Nach Training</td><td>Wrap oder 2 Brote mit Hähnchen/Käse, Banane</td><td>450</td></tr>
+   <tr><td>Abend</td><td>3 Eier oder 150 g Hackfleisch, 2–3 Scheiben Brot mit Butter und Käse, Gemüse</td><td>650</td></tr>
+   <tr><td>Snack</td><td>40 g Nüsse + Trockenobst</td><td>300</td></tr></table>
+   <p class="mute">Dinkel-Mandelmilch hat kaum Protein. Das Protein kommt hier aus Fleisch, Käse und Eiern. Nimm eine Sorte mit zugesetztem Calcium, weil du keine Milch trinkst.</p></div>
+  <div class="card"><h2>Steuerung</h2><ol><li>3–4× pro Woche morgens wiegen (unter „Fortschritt“ eintragen).</li><li>Unter +0,15 kg/Woche: 200–300 kcal mehr (z. B. Brot mit Käse oder Handvoll Nüsse).</li><li>Über +0,4 kg/Woche (2 Wochen lang): 200 kcal weniger.</li></ol>
+  <p class="mute">Kein Hunger? Smoothie aus Dinkel-Mandelmilch, Banane, Haferflocken und Erdnussbutter trinken. Nüsse, Käsewürfel und Trockenobst als Snacks.</p>
   <div class="note">Supplements brauchst du nicht. Kreatin raten Kinderärzte unter 18 ab. Keine Testo-Booster oder „Mass Gainer“ mit Zusatzstoffen.</div></div>`;
 }
 
