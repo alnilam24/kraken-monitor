@@ -125,6 +125,18 @@ td+td,th+th{padding-left:10px}
 .x{border:1px solid var(--line);background:none;width:32px;height:32px;border-radius:8px;color:var(--mute);font-size:14px;flex:none}
 ol,ul{margin:6px 0 0;padding-left:20px}li{margin:5px 0}
 .hide{display:none}
+.check{margin-left:auto;flex:none;width:34px;height:34px;border-radius:50%;border:1.5px solid var(--hair);background:none;color:var(--ink);display:inline-flex;align-items:center;justify-content:center;padding:0}
+.check svg{opacity:.25}
+.check:active{background:var(--c,var(--ink));border-color:var(--c,var(--ink));color:#fff}.check:active svg{opacity:1}
+.item .top .check{align-self:center}
+.opt{font-weight:500;color:var(--mute);font-size:13px;margin-left:4px}
+.unit{transition:transform .38s cubic-bezier(.5,0,.75,0),opacity .38s,max-height .3s .3s,margin .3s .3s}
+.unit.leaving{transform:translateX(110%);opacity:0}
+.unit.gone{max-height:0!important;margin-top:0;overflow:hidden}
+.donerow{display:flex;align-items:center;gap:10px}
+.tick{width:26px;height:26px;border-radius:50%;background:var(--c,var(--ink));color:#fff;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.tick svg{width:15px;height:15px}
+.undo{border:0;background:none;color:var(--mute);font-size:13px;font-weight:600;text-decoration:underline;text-underline-offset:3px;padding:6px 0}
 .t-kraft{--c:var(--kraft)}.t-lauf{--c:var(--lauf)}.t-swim{--c:var(--swim)}.t-food{--c:var(--food)}.t-rest{--c:var(--line)}.t-ink{--c:var(--ink)}
 .lane{position:relative;overflow:hidden}
 .lane::before{content:"";position:absolute;left:0;right:0;top:0;height:3px;background:var(--c)}
@@ -207,6 +219,7 @@ function paces(){
 /* ================= Plan ================= */
 const isDeload=w=>w%4===0;
 const isTest=w=>w===1||(w-1)%8===0;
+const is10k=w=>w>=5&&(w-5)%8===0;
 function phase(w){
   if(w<=4)return {name:"Technik",hint:"Ohne Rucksack, saubere Technik",a:null};
   if(w<=20)return {name:"Aufbau",hint:"Rucksack schrittweise bis 10–12 kg",a:null};
@@ -277,6 +290,8 @@ function ruckKg(name,w){
   return "Rucksack "+lo+"–"+hi+" kg";
 }
 INFO["Rumpfdrehbeugen"]={w:"Im Stehen abwechselnd mit einer Hand zum gegenüberliegenden Fuß drehen und beugen. Trainiert seitliche Bauchmuskeln, Rücken und Beweglichkeit und bringt den Puls hoch.",s:["Breitbeinig stehen, Füße deutlich weiter als schulterbreit, Knie leicht gebeugt.","Arme seitlich gestreckt auf Schulterhöhe.","Oberkörper drehen und nach vorn beugen, mit der rechten Hand den linken Fuß berühren. Der linke Arm zeigt nach oben.","Zurück in die Mitte, dann die linke Hand zum rechten Fuß.","Zügig, aber kontrolliert im Wechsel. Eine Berührung zählt als eine Wiederholung."],t:"Nicht ruckartig reißen. Kommst du nicht bis zum Fuß, reicht das Schienbein. Die Beweglichkeit kommt mit der Zeit."};
+INFO["Satz-Kästchen"]={w:"Jedes Kästchen ist ein Satz. Bei „4 × 6–12“ hast du vier Kästchen für vier Sätze.",s:["Satz machen.","Kästchen antippen, es wird farbig.","Pause laut Angabe, dann der nächste Satz.","Sind alle Kästchen voll, kommt die nächste Übung."],t:"So verlierst du nie den Überblick, wie viele Sätze du schon hast. Wenn die ganze Einheit fertig ist, oben rechts den Haken antippen."};
+INFO["10-km-Lauf auf Zeit"]={w:"Alle acht Wochen läufst du deine 10 km zügig auf Zeit statt des Tempolaufs. Er liegt immer direkt nach einer Entlastungswoche, damit du ausgeruht bist.",s:["15 min locker einlaufen.","10 km zügig und gleichmäßig. Starte etwas langsamer, als du denkst, und werde zum Ende schneller, wenn es geht.","10 min locker auslaufen.","Werte eintragen, die Zeit landet in der Statistik."],t:"Am Sonntag danach ist trotzdem der lange lockere Lauf. Lauf den dann wirklich ruhig."};
 INFO["Wiegen"]={w:"Dein Gewicht schwankt am Tag um bis zu 1–2 kg, je nach Essen, Trinken und Toilette. Damit die Werte vergleichbar sind, wiegst du dich immer gleich.",s:["Montag, Mittwoch, Freitag und Sonntag.","Morgens direkt nach dem Aufstehen und nach der Toilette.","Vor dem Essen und Trinken.","In Unterwäsche, immer auf derselben Waage am selben Platz.","Wert sofort in der App eintragen."],t:"Einzelne Werte sind egal. Die App rechnet den Wochenschnitt aus, und nur der zählt."};
 INFO["Krafttest"]={w:"Alle acht Wochen misst du, wie stark du geworden bist. Die Werte landen in der Statistik.",s:["Normal aufwärmen: 8–10 min rudern, dann 10 lockere Liegestütze.","Liegestütze-Test: mit dem angegebenen Rucksack-Gewicht so viele saubere Wiederholungen wie möglich. Brust bis eine Faust über dem Boden, oben Arme gestreckt, Körper gerade.","3 Minuten Pause.","Klimmzug-Test in der Schule: aus dem toten Hang, Ristgriff, Kinn über die Stange, kein Schwung. So viele wie möglich.","Danach Kraft A wie geplant, aber mit einem Satz weniger pro Übung."],t:"Gezählt wird nur, was sauber war. Halbe Wiederholungen zählen nicht."};
 INFO["5-km-Test"]={w:"Alle acht Wochen läufst du 5 km auf Zeit. Daraus berechnet die App deine Laufgeschwindigkeiten neu.",s:["Flache Strecke oder Bahn, am besten immer dieselbe.","15 min locker einlaufen, dabei 3 Steigerungen über 15–20 Sekunden.","5 km so schnell, wie du gleichmäßig durchhältst. Der erste Kilometer nicht schneller als der Rest.","10 min locker auslaufen.","Unten Distanz, Zeit und Puls eintragen und Art „5-km-Test“ lassen."],t:"Am Vortag ist Ruhe oder nur Krafttraining, also bist du ausgeruht."};
@@ -318,7 +333,7 @@ function dayPlan(d){
     case 2:run("int");break;
     case 3:items.push({kind:"rest",opt:true});break;
     case 4:kraft("B");run("easy");break;
-    case 5:if(isTest(w)){const P=paces();items.push({kind:"run",t:"5-km-Test",run:"test",d:"15 min einlaufen mit 3 kurzen Steigerungen, dann 5 km so schnell, wie du gleichmäßig durchhältst, 10 min auslaufen",pace:"gleichmäßig, am Limit"})}else run("tempo");break;
+    case 5:if(isTest(w)){const P=paces();items.push({kind:"run",t:"5-km-Test",run:"test",d:"15 min einlaufen mit 3 kurzen Steigerungen, dann 5 km so schnell, wie du gleichmäßig durchhältst, 10 min auslaufen",pace:"gleichmäßig, am Limit"})}else if(is10k(w)){items.push({kind:"run",t:"10-km-Lauf auf Zeit",run:"test10",d:"15 min einlaufen, dann 10 km zügig und gleichmäßig auf Zeit, 10 min auslaufen",pace:"zügig, gleichmäßig"})}else run("tempo");break;
     case 6:kraft("C");items.push({kind:"swim"});break;
     case 0:run("long");break;
   }
@@ -328,7 +343,7 @@ function titleOf(it){return it.kind==="kraft"?KRAFT[it.key].name:it.kind==="run"
 function laneType(d){const it=dayPlan(d).items;return it.some(i=>i.kind==="kraft")?"kraft":it.some(i=>i.kind==="run")?"lauf":"rest"}
 function laneLabel(d){
   const it=dayPlan(d).items.filter(i=>i.kind!=="swim"&&i.kind!=="test");
-  const lab=i=>i.kind==="kraft"?(i.key==="BANK"?"Bank&shy;drücken":"Kraft "+i.key):i.kind==="rest"?"Ruhe":({int:"Inter&shy;valle",tempo:"Tempo",long:"Langer Lauf",easy:"Locker",test:"5-km-Test"})[i.run];
+  const lab=i=>i.kind==="kraft"?(i.key==="BANK"?"Bank&shy;drücken":"Kraft "+i.key):i.kind==="rest"?"Ruhe":({int:"Inter&shy;valle",tempo:"Tempo",long:"Langer Lauf",easy:"Locker",test:"5-km-Test",test10:"10 km Zeit"})[i.run];
   return it.length>1?lab(it[0])+"<span>+ Lauf</span>":lab(it[0]);
 }
 const trainingDays=d=>{const m=mondayOf(d);let n=0;for(let i=0;i<7;i++){const x=new Date(m);x.setDate(m.getDate()+i);if(dayPlan(x).items.some(t=>t.kind!=="rest"))n++}return n};
@@ -395,13 +410,22 @@ function runForm(prefix,type){
     <div><label for="${prefix}t">Zeit (mm:ss)</label><input id="${prefix}t" inputmode="numeric" placeholder="z. B. 34:10"></div>
     <div><label for="${prefix}a">Ø Herzfrequenz</label><input id="${prefix}a" inputmode="numeric" placeholder="bpm"></div>
     <div><label for="${prefix}m">Max. Herzfrequenz</label><input id="${prefix}m" inputmode="numeric" placeholder="bpm"></div>
-    ${type?`<input type="hidden" id="${prefix}type" value="${type}">`:`<div class="full"><label for="${prefix}type">Art</label><select id="${prefix}type"><option value="easy">Locker</option><option value="long">Lang</option><option value="tempo">Tempo</option><option value="int">Intervalle</option><option value="test">5-km-Test</option></select></div>`}
+    ${type?`<input type="hidden" id="${prefix}type" value="${type}">`:`<div class="full"><label for="${prefix}type">Art</label><select id="${prefix}type"><option value="easy">Locker</option><option value="long">Lang</option><option value="tempo">Tempo</option><option value="int">Intervalle</option><option value="test">5-km-Test</option><option value="test10">10 km auf Zeit</option></select></div>`}
   </div></div>`;
 }
 
+function unitKey(it){return it.kind==="kraft"?"kraft":it.kind==="run"?"run":it.kind==="test"?"test":it.kind==="swim"?"swim":null}
+const CHECK_SVG='<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+function checkBtn(u,label){return `<button class="check" data-check="${u}" aria-label="${esc(label)} abhaken">${CHECK_SVG}</button>`}
+function syncDone(dk){
+  const p=dayPlan(parse(dk)),st=(S.items||{})[dk]||{};
+  const req=p.items.map(unitKey).filter(u=>u&&u!=="swim");
+  if(req.length&&req.every(u=>st[u]))S.done[dk]=true;else delete S.done[dk];
+}
 function vHeute(){
   const d0=new Date();d0.setHours(0,0,0,0);const pre=d0<parse(S.start);
   const d=pre?parse(S.start):new Date(),dk=iso(d),p=dayPlan(d);
+  S.items=S.items||{};const st=S.items[dk]||{};
   const titles=p.items.filter(i=>i.kind!=="swim"&&i.kind!=="test").map(titleOf).join(" + ");
   let h=`<div class="hero"><div class="date">${pre?"Dein Start: ":""}${fmtDate(d)}</div><h1>${esc(titles)}</h1>
     <div class="sub">Phase ${p.ph.name}${p.dl?", Entlastungswoche":""}</div>
@@ -415,31 +439,37 @@ function vHeute(){
     h+=`<div class="sec"><div class="group side t-food"><div class="item"><div class="top"><span class="name">Morgens wiegen${infoBtn("Wiegen")}</span><span class="rx">Mo, Mi, Fr, So</span></div>
       ${got?`<p>Eingetragen: <b style="color:var(--ink)">${de(got.v)} kg</b></p>`:`<p>Nach dem Aufstehen und Toilette, vor dem Essen, in Unterwäsche.</p><div class="inline"><input id="qw" inputmode="decimal" placeholder="kg, z. B. 58,4"><button class="btn" id="qwSave">Speichern</button></div>`}</div></div></div>`;
   }
+  const doneList=[];
   for(const it of p.items){
+    const u=unitKey(it);
+    if(u&&st[u]){doneList.push({u,it});continue}
+    const cb=(!pre&&u)?checkBtn(u,titleOf(it)):"";
     if(it.kind==="kraft"){
       const k=KRAFT[it.key];
-      h+=`<div class="sec t-kraft"><h2><span class="dot"></span>${k.name}</h2><div class="lead">${k.tag}. Erst 8–10 min locker rudern. Jeder Satz endet 1–2 Wiederholungen vor dem Versagen. Wie viel in den Rucksack kommt, steht bei jeder Übung ${infoBtn("Rucksack-Gewicht")}</div><div class="group">${exItems(it.key,dk,p.dl)}</div></div>`;
+      h+=`<div class="sec unit t-kraft" data-u="${u}"><h2><span class="dot"></span>${k.name}${cb}</h2><div class="lead">${k.tag}. Erst 8–10 min locker rudern. Jeder Satz endet 1–2 Wiederholungen vor dem Versagen. Nach jedem Satz das Kästchen antippen ${infoBtn("Satz-Kästchen")}</div><div class="group">${exItems(it.key,dk,p.dl)}</div></div>`;
     }else if(it.kind==="run"){
-      h+=`<div class="sec t-lauf"><h2><span class="dot"></span>${esc(it.t)}${infoBtn(it.t)}</h2><div class="group"><div class="item"><div class="name">${esc(it.d)}</div>
-        <div class="chips"><span class="chip c num">${esc(it.pace)}${it.run==="test"?"":" min/km"}</span>${it.note?`<span class="chip w">${esc(it.note)}</span>`:""}</div>
-        ${paces().known?"":'<p>Die Paces gehen von 25:00 auf 5 km aus. Trag deine Testzeit unter „Mehr“ ein, dann passen sie sich an.</p>'}</div>
+      h+=`<div class="sec unit t-lauf" data-u="${u}"><h2><span class="dot"></span>${esc(it.t)}${infoBtn(it.t)}${cb}</h2><div class="group"><div class="item"><div class="name">${esc(it.d)}</div>
+        <div class="chips"><span class="chip c num">${esc(it.pace)}${/^test/.test(it.run)?"":" min/km"}</span>${it.note?`<span class="chip w">${esc(it.note)}</span>`:""}</div>
+        ${paces().known?"":'<p>Die Paces gehen von 25:00 auf 5 km aus. Trag deine Testzeit unter „Mehr“ ein, dann passen sie sich an.</p>'}
+        ${pre?"":"<p>Werte aus der Fitness-App eintragen und dann oben abhaken.</p>"}</div>
         ${pre?"":runForm("r",it.run)}</div></div>`;
     }else if(it.kind==="test"){
       const kg=ruckKg("Liegestütze mit Rucksack",p.w).replace("Ohne Rucksack","ohne Rucksack");
-      h+=`<div class="sec t-ink"><h2><span class="dot"></span>Krafttest${infoBtn("Krafttest")}</h2><div class="lead">Vor Kraft A, nach dem Aufwärmen. Zähl ehrlich bis zur letzten sauberen Wiederholung.</div><div class="group"><div class="form"><div class="f">
+      h+=`<div class="sec unit t-ink" data-u="${u}"><h2><span class="dot"></span>Krafttest${infoBtn("Krafttest")}${cb}</h2><div class="lead">Vor Kraft A, nach dem Aufwärmen. Zähl ehrlich bis zur letzten sauberen Wiederholung, trag die Werte ein und hake ab.</div><div class="group"><div class="form"><div class="f">
         <div><label for="tp">Liegestütze (${kg})</label><input id="tp" inputmode="numeric" placeholder="Wdh."></div>
         <div><label for="tk">Rucksack (kg)</label><input id="tk" inputmode="decimal" placeholder="0"></div>
-        <div class="full"><label for="tq">Klimmzüge (Wdh.)</label><input id="tq" inputmode="numeric" placeholder="Wdh."></div></div>
-        <div class="btnrow"><button class="btn" id="testSave">Test speichern</button></div></div></div></div>`;
+        <div class="full"><label for="tq">Klimmzüge (Wdh.)</label><input id="tq" inputmode="numeric" placeholder="Wdh."></div></div></div></div></div>`;
     }else if(it.kind==="swim"){
-      h+=`<div class="sec"><div class="group side t-swim"><div class="item"><div class="top"><span class="name">Schwimmen am Abend</span><span class="rx">optional</span></div><p>Zweimal pro Woche reicht, am besten Montag und Samstag.</p></div></div></div>`;
+      h+=`<div class="sec unit" data-u="${u}"><div class="group side t-swim"><div class="item"><div class="top"><span class="name">Schwimmen am Abend <span class="opt">optional</span></span>${cb}</div><p>Zweimal pro Woche reicht, am besten Montag und Samstag. Zählt nicht zum Pflichtprogramm.</p></div></div></div>`;
     }else{
       h+=`<div class="sec"><div class="group"><div class="item"><div class="name">Heute ist frei</div><p>Lockeres Schwimmen am Abend geht, muss aber nicht. Schlaf ist heute dein Training.</p></div></div></div>`;
     }
   }
-  if(!pre&&p.items.some(i=>i.kind!=="rest")){
-    const done=!!S.done[dk];
-    h+=`<div class="sec"><button class="btn ${done?"ghost":""}" id="dayDone">${done?"Erledigt. Rückgängig machen":"Training abschließen"}</button></div>`;
+  if(doneList.length){
+    const all=!!S.done[dk];
+    h+=`<div class="sec"><h2>${all?"Tagesprogramm geschafft":"Heute geschafft"}</h2>${all?'<div class="lead">Alles Pflichtprogramm für heute ist erledigt.</div>':""}<div class="group">${doneList.map(({u,it})=>{
+      const cls=it.kind==="kraft"?"t-kraft":it.kind==="run"?"t-lauf":it.kind==="swim"?"t-swim":"t-ink";
+      return `<div class="item entry ${cls}"><div class="donerow"><span class="tick">${CHECK_SVG}</span><span class="name">${esc(titleOf(it))}</span></div><button class="undo" data-uncheck="${u}">Rückgängig</button></div>`}).join("")}</div></div>`;
   }
   return h;
 }
@@ -526,7 +556,8 @@ const RULES=[
  ["Tests","t-ink",[
   ["Wann","In Woche 1 und danach alle acht Wochen, jeweils direkt nach einer Entlastungswoche. Die App zeigt „Testwoche“ an."],
   ["Montag","Liegestütze mit dem aktuellen Rucksack-Gewicht und Klimmzüge, jeweils so viele saubere wie möglich. Danach normal Kraft A."],
-  ["Freitag","5-km-Test statt Tempolauf. Die Zeit passt deine Laufgeschwindigkeiten automatisch an."]]],
+  ["Freitag","5-km-Test statt Tempolauf. Die Zeit passt deine Laufgeschwindigkeiten automatisch an."],
+  ["10 km auf Zeit","In Woche 5 und danach alle acht Wochen läufst du freitags statt des Tempolaufs 10 km zügig auf Zeit."]]],
  ["Essen und Trinken","t-food",[
   ["Mahlzeiten","4–5 Mahlzeiten am Tag, keine auslassen, auch nicht an Ruhetagen. In jeder steckt Protein: Fleisch, Käse oder Hülsenfrüchte."],
   ["Vor dem Training","1–2 Stunden vorher eine kleine Mahlzeit mit Kohlenhydraten, zum Beispiel ein Käsebrot oder eine Banane."],
@@ -544,7 +575,7 @@ const RULES=[
   ["Was","Halbe Sätze, etwa 30 % weniger Laufen, keine Intervalle. In dieser Woche wirst du stärker."]]]
 ];
 /* ---------- Eintragen ---------- */
-const RUNTYPE={easy:"Locker",long:"Lang",tempo:"Tempo",int:"Intervalle",test:"5-km-Test"};
+const RUNTYPE={easy:"Locker",long:"Lang",tempo:"Tempo",int:"Intervalle",test:"5-km-Test",test10:"10 km auf Zeit"};
 function vLog(){
   const tabs=[["lauf","Lauf"],["gewicht","Gewicht"],["kraft","Kraft"]];
   let h=`<div class="hero"><h1>Eintragen</h1><div class="sub">Werte aus der Fitness-App übernehmen</div></div>
@@ -602,6 +633,8 @@ function vStats(){
   // 5 km
   const t5=[...S.logs.run5k.map(e=>({date:e.date,v:e.v})),...runs.filter(r=>r.type==="test"&&r.km>=4.95&&r.km<=5.2).map(r=>({date:r.date,v:r.sec*5/r.km}))];
   h+=panel("5-km-Zeit","Tiefer ist besser. Die Linie zeigt das Ziel von 23:00.",lineChart(t5,{fmt:mmss,goal:1380,goalLabel:"23:00",invert:true,color:"var(--lauf)"}),"t-lauf");
+  const t10=runs.filter(r=>r.type==="test10"&&r.km>=9.8&&r.km<=10.4).map(r=>({date:r.date,v:r.sec*10/r.km}));
+  h+=panel("10-km-Zeit","Deine Läufe auf Zeit. Tiefer ist besser.",lineChart(t10,{fmt:mmss,invert:true,color:"var(--lauf)"}),"t-lauf");
   // Gewicht
   h+=panel("Körpergewicht","Wochenschnitt. Ziel: 0,15–0,3 kg pro Woche mehr.",lineChart(ww,{fmt:v=>de(v),color:"var(--food)"})+weightAdvice(ww),"t-food");
   // Effizienz
@@ -671,6 +704,18 @@ $("#nav").addEventListener("click",e=>{const b=e.target.closest("button");if(b){
 $("#app").addEventListener("click",e=>{
   const t=e.target.closest("button");if(!t)return;
   if(t.dataset.info){openInfo(t.dataset.info);return}
+  if(t.dataset.check){
+    const u=t.dataset.check,dk=iso(new Date());
+    if(u==="run"&&$("#rkm")&&$("#rkm").value){const r=readRun("r");if(!r)return;addRun(r,dk)}
+    if(u==="test"){const pp=parseInt($("#tp").value),k=parseFloat(($("#tk").value||"0").replace(",","."))||0,q=parseInt($("#tq").value);
+      if(!isNaN(pp))S.logs.push.push({date:dk,v:pp,kg:k});if(!isNaN(q))S.logs.pull.push({date:dk,v:q})}
+    S.items=S.items||{};S.items[dk]=S.items[dk]||{};S.items[dk][u]=true;syncDone(dk);save();
+    const el=t.closest(".unit");
+    if(el&&!matchMedia("(prefers-reduced-motion: reduce)").matches){el.style.maxHeight=el.scrollHeight+"px";t.style.background="var(--c,var(--ink))";t.style.color="#fff";t.querySelector("svg").style.opacity=1;
+      requestAnimationFrame(()=>{el.classList.add("leaving");setTimeout(()=>el.classList.add("gone"),380);setTimeout(render,700)})}
+    else render();
+    return}
+  if(t.dataset.uncheck){const dk=iso(new Date());if(S.items&&S.items[dk])delete S.items[dk][t.dataset.uncheck];syncDone(dk);save();render();return}
   if(t.id==="qwSave"){const v=parseFloat(($("#qw").value||"").replace(",","."));if(isNaN(v))return;S.logs.weight.push({date:iso(new Date()),v});save();render();return}
   if(t.id==="testSave"){const d=iso(new Date()),pp=parseInt($("#tp").value),k=parseFloat(($("#tk").value||"0").replace(",","."))||0,q=parseInt($("#tq").value);
     if(!isNaN(pp))S.logs.push.push({date:d,v:pp,kg:k});if(!isNaN(q))S.logs.pull.push({date:d,v:q});save();t.textContent="Gespeichert";return}
