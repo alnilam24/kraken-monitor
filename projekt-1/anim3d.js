@@ -95,16 +95,16 @@ function posePull(t){ // t: 0 unten (toter Hang), 1 oben
 const EX={
   push:{name:"Liegestütze",pose:posePush,timing:[[0,0,0.4],[0,1,2.0],[1,1,0.3],[1,0,1.0]],
     cues:["Körper bildet eine gerade Linie von Kopf bis Ferse.","Lendenwirbelsäule neutral: Bauch und Po fest, die Hüfte hängt nicht durch.","Ellbogen zeigen etwa 45° vom Körper weg nach hinten.","Runter bis die Brust eine Faust über dem Boden ist, dann ganz hoch."],
-    labels:["lws","bws","pect","tri","abs","scap"]},
+    labels:["bws","pect","tri","abs","scap"]},
   pull:{name:"Klimmzüge",pose:posePull,timing:[[0,0,0.6],[0,1,1.2],[1,1,0.4],[1,0,2.0]],
     cues:["Start aus dem toten Hang, Arme gestreckt.","Zuerst die Schulterblätter nach unten ziehen, dann die Arme beugen.","Hoch, bis das Kinn über der Stange ist.","Lendenwirbelsäule neutral, kein Schwung aus Beinen oder Hüfte."],
-    labels:["lws","bws","lat","bic","trap","scap"]},
+    labels:["bws","lat","bic","trap","scap"]},
   pushElev:{name:"Füße erhöht",pose:posePushElev,timing:[[0,0,0.4],[0,1,2.0],[1,1,0.3],[1,0,1.0]],
-    cues:["Füße auf Stuhl oder Bett, Körper trotzdem gerade.","Lendenwirbelsäule neutral, die Hüfte hängt nicht durch.","Ellbogen etwa 45° vom Körper."],labels:["lws","pect","tri","abs"]},
+    cues:["Füße auf Stuhl oder Bett, Körper trotzdem gerade.","Lendenwirbelsäule neutral, die Hüfte hängt nicht durch.","Ellbogen etwa 45° vom Körper."],labels:["pect","tri","abs"]},
   hollow:{name:"Hollow Hold",pose:poseHollow,timing:[[0,1,1.6],[1,0,1.6]],
-    cues:["Lendenwirbelsäule fest auf den Boden drücken.","Schultern und gestreckte Beine leicht anheben.","Ruhig weiteratmen und halten."],labels:["lws","abs","bws"]},
+    cues:["Lendenwirbelsäule fest auf den Boden drücken.","Schultern und gestreckte Beine leicht anheben.","Ruhig weiteratmen und halten."],labels:["abs","bws"]},
   split:{name:"Split Squats",pose:poseSplit,timing:[[0,0,0.4],[0,1,1.8],[1,1,0.3],[1,0,1.1]],
-    cues:["Hinterer Fuß auf dem Stuhl, vorderer weit genug vorn.","Senkrecht runter, vorderes Knie bleibt über dem Fuß.","Über die Ferse hochdrücken."],labels:["lws","quad","glute"]}
+    cues:["Hinterer Fuß auf dem Stuhl, vorderer weit genug vorn.","Senkrecht runter, vorderes Knie bleibt über dem Fuß.","Über die Ferse hochdrücken."],labels:["quad","glute"]}
 };
 function phaseAt(ex,time){
   const tm=EX[ex].timing,total=tm.reduce((s,x)=>s+x[2],0);let t=time%total;
@@ -252,7 +252,7 @@ function mount3D(el,ex){
   if(!document.getElementById("p3css")){const s=document.createElement("style");s.id="p3css";s.textContent=css;document.head.appendChild(s)}
   el.classList.add("m3");el.innerHTML='<canvas></canvas><button class="m3x" aria-label="Groß ansehen">Vollbild</button><span class="m3h">Ziehen zum Drehen</span>';
   const cv=el.querySelector("canvas"),ctx=cv.getContext("2d"),d=DEF[ex]||DEF.push;
-  const st={ex,time:0,playing:true,speed:1,yaw:d[0],pitch:d[1],dist:d[2]*1.05,layers:{outline:1,skel:1,muscle:1,labels:1},labelKeys:["lws"]};
+  const st={ex,time:0,playing:true,speed:1,yaw:d[0],pitch:d[1],dist:d[2]*1.05,layers:{outline:1,skel:1,muscle:1,labels:1},labelKeys:[]};
   let W=0,H=0,C=getColors(),moved=0,startX=0,startY=0,drag=null;
   const rs=()=>{const r=el.getBoundingClientRect(),dpr=Math.min(2,devicePixelRatio||1);W=r.width;H=r.height;cv.width=W*dpr;cv.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0)};rs();
   const ro=new ResizeObserver(rs);ro.observe(el);
