@@ -130,8 +130,19 @@ td+td,th+th{padding-left:10px}
 .x{border:1px solid var(--line);background:none;width:32px;height:32px;border-radius:8px;color:var(--mute);font-size:14px;flex:none}
 ol,ul{margin:6px 0 0;padding-left:20px}li{margin:5px 0}
 .hide{display:none}
+.exrow{display:flex;align-items:center;gap:12px}
+.exmain{flex:1;min-width:0}
+.meta{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin-top:6px;font-size:14px;color:var(--mute)}
+.meta b{color:var(--ink);font-weight:650}
+.setbars{display:inline-flex;gap:3px}
+.setbars i{display:block;width:6px;height:14px;border-radius:2px;background:var(--kraft)}
+.item.ex{transition:transform .32s cubic-bezier(.5,0,.75,0),opacity .32s,max-height .25s .3s,padding .25s .3s}
+.item.ex.leaving{transform:translateX(110%);opacity:0}
+.item.ex.gone{max-height:0!important;padding-top:0;padding-bottom:0;overflow:hidden}
+.exdone .name{color:var(--mute);font-weight:550}
+.exdone{display:flex;justify-content:space-between;align-items:center;padding-top:10px;padding-bottom:10px}
 .check{margin-left:auto;flex:none;width:34px;height:34px;border-radius:50%;border:1.5px solid var(--hair);background:none;color:var(--ink);display:inline-flex;align-items:center;justify-content:center;padding:0}
-.check svg{opacity:.25}
+.check svg{opacity:.45}
 .check:active{background:var(--c,var(--ink));border-color:var(--c,var(--ink));color:#fff}.check:active svg{opacity:1}
 .item .top .check{align-self:center}
 .opt{font-weight:500;color:var(--mute);font-size:13px;margin-left:4px}
@@ -403,14 +414,22 @@ function header(){
   const w=weekNo(t);$("#hdr").textContent="Woche "+Math.min(w,52)+" von 52";
 }
 
-function exItems(key,dk,dl){
-  const st=S.sets[dk]||{},ph=phase(weekNo(parse(dk)));
-  return KRAFT[key].ex.map((e,i)=>{
+function exItems(key,dk,dl,live){
+  const done=(S.ex||{})[dk]||{},ph=phase(weekNo(parse(dk)));
+  let open="",fin="";
+  KRAFT[key].ex.forEach((e,i)=>{
     const n=dl?Math.max(1,Math.ceil(e[1]/2)):e[1];
     const reps=(key==="A"&&i===0&&ph.a)?ph.a:e[2];
-    const b=Array.from({length:n},(_,j)=>`<button class="set ${st[i+"-"+j]?"done":""}" data-set="${dk}|${i}-${j}" aria-label="Satz ${j+1}">${j+1}</button>`).join("");
-    return `<div class="item"><div class="top"><span class="name">${esc(e[0])}${infoBtn(e[0])}</span><span class="rx num">${n} × ${esc(reps)}</span></div><p>Pause ${e[3]}</p>${(()=>{const k=ruckKg(e[0],weekNo(parse(dk)));return k?`<span class="kg">${k}</span>`:""})()}<div class="sets">${b}</div></div>`;
-  }).join("");
+    if(done[i]){fin+=`<div class="item exdone"><div class="donerow"><span class="tick">${CHECK_SVG}</span><span class="name">${esc(e[0])}</span></div><button class="undo" data-exundo="${i}">Rückgängig</button></div>`;return}
+    const k=ruckKg(e[0],weekNo(parse(dk)));
+    const bars=Array.from({length:n},()=>'<i></i>').join("");
+    open+=`<div class="item ex" data-ex="${i}"><div class="exrow"><div class="exmain">
+      <div class="top"><span class="name">${esc(e[0])}${infoBtn(e[0])}</span></div>
+      <div class="meta"><span class="setbars" aria-hidden="true">${bars}</span><b class="num">${n} Sätze × ${esc(reps)}</b><span>Pause ${e[3]}</span></div>
+      ${k?`<span class="kg">${k}</span>`:""}</div>
+      ${live?`<button class="check" data-excheck="${i}" aria-label="${esc(e[0])} abhaken">${CHECK_SVG}</button>`:""}</div></div>`;
+  });
+  return open+fin;
 }
 function runForm(prefix,type){
   return `<div class="form" style="border-top:1px solid var(--line)"><div class="f">
@@ -454,7 +473,7 @@ function vHeute(){
     const cb=(!pre&&u)?checkBtn(u,titleOf(it)):"";
     if(it.kind==="kraft"){
       const k=KRAFT[it.key];
-      h+=`<div class="sec unit t-kraft" data-u="${u}"><h2><span class="dot"></span>${k.name}${cb}</h2><div class="lead">${k.tag}. Erst 8–10 min locker rudern. Jeder Satz endet 1–2 Wiederholungen vor dem Versagen. Nach jedem Satz das Kästchen antippen ${infoBtn("Satz-Kästchen")}</div><div class="group">${exItems(it.key,dk,p.dl)}</div></div>`;
+      h+=`<div class="sec unit t-kraft" data-u="${u}"><h2><span class="dot"></span>${k.name}${cb}</h2><div class="lead">${k.tag}. Erst 8–10 min locker rudern. Jeder Satz endet 1–2 Wiederholungen vor dem Versagen. Ist eine Übung fertig, rechts abhaken. Oben rechts hakst du die ganze Einheit auf einmal ab.</div><div class="group">${exItems(it.key,dk,p.dl,!pre)}</div></div>`;
     }else if(it.kind==="run"){
       h+=`<div class="sec unit t-lauf" data-u="${u}"><h2><span class="dot"></span>${esc(it.t)}${infoBtn(it.t)}${cb}</h2><div class="group"><div class="item"><div class="name">${esc(it.d)}</div>
         <div class="chips"><span class="chip c num">${esc(it.pace)}${/^test/.test(it.run)?"":" min/km"}</span>${it.note?`<span class="chip w">${esc(it.note)}</span>`:""}</div>
@@ -715,18 +734,32 @@ $("#app").addEventListener("click",e=>{
   const t=e.target.closest("button");if(!t)return;
   if(t.dataset.info){openInfo(t.dataset.info);return}
   if(t.dataset.theme){S.theme=t.dataset.theme;save();applyTheme();render();return}
+  if(t.dataset.excheck!=null){
+    const dk=iso(new Date()),i=+t.dataset.excheck,p=dayPlan(new Date()),key=p.items.find(x=>x.kind==="kraft").key;
+    S.ex=S.ex||{};S.ex[dk]=S.ex[dk]||{};S.ex[dk][i]=true;
+    const allDone=KRAFT[key].ex.every((_,j)=>S.ex[dk][j]);
+    if(allDone){S.items=S.items||{};S.items[dk]=S.items[dk]||{};S.items[dk].kraft=true;syncDone(dk)}
+    save();
+    const el=t.closest(".item");t.style.background="var(--kraft)";t.style.borderColor="var(--kraft)";t.style.color="#fff";t.querySelector("svg").style.opacity=1;
+    if(matchMedia("(prefers-reduced-motion: reduce)").matches){render();return}
+    el.style.maxHeight=el.scrollHeight+"px";
+    requestAnimationFrame(()=>{el.classList.add("leaving");setTimeout(()=>el.classList.add("gone"),330);
+      setTimeout(()=>{if(allDone){const u=document.querySelector('.unit[data-u="kraft"]');if(u){u.style.maxHeight=u.scrollHeight+"px";u.classList.add("leaving");setTimeout(()=>u.classList.add("gone"),380);setTimeout(render,700);return}}render()},600)});
+    return}
+  if(t.dataset.exundo!=null){const dk=iso(new Date());if(S.ex&&S.ex[dk])delete S.ex[dk][t.dataset.exundo];if(S.items&&S.items[dk])delete S.items[dk].kraft;syncDone(dk);save();render();return}
   if(t.dataset.check){
     const u=t.dataset.check,dk=iso(new Date());
     if(u==="run"&&$("#rkm")&&$("#rkm").value){const r=readRun("r");if(!r)return;addRun(r,dk)}
     if(u==="test"){const pp=parseInt($("#tp").value),k=parseFloat(($("#tk").value||"0").replace(",","."))||0,q=parseInt($("#tq").value);
       if(!isNaN(pp))S.logs.push.push({date:dk,v:pp,kg:k});if(!isNaN(q))S.logs.pull.push({date:dk,v:q})}
+    if(u==="kraft"){const it=dayPlan(new Date()).items.find(x=>x.kind==="kraft");S.ex=S.ex||{};S.ex[dk]=S.ex[dk]||{};KRAFT[it.key].ex.forEach((_,j)=>S.ex[dk][j]=true)}
     S.items=S.items||{};S.items[dk]=S.items[dk]||{};S.items[dk][u]=true;syncDone(dk);save();
     const el=t.closest(".unit");
     if(el&&!matchMedia("(prefers-reduced-motion: reduce)").matches){el.style.maxHeight=el.scrollHeight+"px";t.style.background="var(--c,var(--ink))";t.style.color="#fff";t.querySelector("svg").style.opacity=1;
       requestAnimationFrame(()=>{el.classList.add("leaving");setTimeout(()=>el.classList.add("gone"),380);setTimeout(render,700)})}
     else render();
     return}
-  if(t.dataset.uncheck){const dk=iso(new Date());if(S.items&&S.items[dk])delete S.items[dk][t.dataset.uncheck];syncDone(dk);save();render();return}
+  if(t.dataset.uncheck){const dk=iso(new Date());if(S.items&&S.items[dk])delete S.items[dk][t.dataset.uncheck];if(t.dataset.uncheck==="kraft"&&S.ex)delete S.ex[dk];syncDone(dk);save();render();return}
   if(t.id==="qwSave"){const v=parseFloat(($("#qw").value||"").replace(",","."));if(isNaN(v))return;S.logs.weight.push({date:iso(new Date()),v});save();render();return}
   if(t.id==="testSave"){const d=iso(new Date()),pp=parseInt($("#tp").value),k=parseFloat(($("#tk").value||"0").replace(",","."))||0,q=parseInt($("#tq").value);
     if(!isNaN(pp))S.logs.push.push({date:d,v:pp,kg:k});if(!isNaN(q))S.logs.pull.push({date:d,v:q});save();t.textContent="Gespeichert";return}
