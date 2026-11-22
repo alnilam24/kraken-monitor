@@ -219,25 +219,29 @@ const KRAFT={
   ["Dips zwischen zwei Stühlen",3,"6–12","2 min"],
   ["Bulgarische Split Squats mit Rucksack",3,"8–12 je Bein","90 s"],
   ["Klimmzüge mit Rucksack (Schule)",3,"5–8","2 min"],
-  ["Hollow Hold",3,"30–45 s","60 s"]]},
+  ["Hollow Hold",3,"30–45 s","60 s"],
+  ["Rumpfdrehbeugen",3,"20 (10 je Seite)","30 s"]]},
  B:{name:"Kraft B",tag:"Aufbau",ex:[
   ["Deficit-Liegestütze zwischen Stühlen",3,"8–15","90 s"],
   ["Pike-Liegestütze",3,"6–12","90 s"],
   ["Einbeiniges rumänisches Kreuzheben",3,"10 je Bein","90 s"],
   ["Tisch-Rudern",3,"10–15","90 s"],
-  ["Nordic Curls, langsam ablassen",3,"3–6","2 min"]]},
+  ["Nordic Curls, langsam ablassen",3,"3–6","2 min"],
+  ["Rumpfdrehbeugen",3,"20 (10 je Seite)","30 s"]]},
  C:{name:"Kraft C",tag:"Volumen",ex:[
   ["Liegestütze mit Rucksack",3,"12–20","90 s"],
   ["Dips",3,"Max. minus 2","90 s"],
   ["Klimmzüge am Reck oder Tisch-Rudern",3,"Max. minus 2","2 min"],
   ["Ausfallschritte gehend mit Rucksack",3,"12 je Bein","90 s"],
   ["Liegendes Beinheben",3,"10–15","60 s"],
-  ["Einbeiniges Wadenheben an einer Stufe",3,"15 je Bein","60 s"]]},
+  ["Einbeiniges Wadenheben an einer Stufe",3,"15 je Bein","60 s"],
+  ["Rumpfdrehbeugen",3,"20 (10 je Seite)","30 s"]]},
  BANK:{name:"Bankdrücken",tag:"Langhantel, mit Partner",ex:[
   ["Bankdrücken mit Langhantel",4,"5–8","2–3 min"],
   ["Dips",3,"6–12","2 min"],
   ["Bulgarische Split Squats mit Rucksack",3,"8–12 je Bein","90 s"],
-  ["Klimmzüge mit Rucksack (Schule)",3,"5–8","2 min"]]}
+  ["Klimmzüge mit Rucksack (Schule)",3,"5–8","2 min"],
+  ["Rumpfdrehbeugen",3,"20 (10 je Seite)","30 s"]]}
 };
 const INFO={
  "Liegestütze, Füße erhöht, mit Rucksack":{w:"Liegestütze mit den Füßen auf einem Stuhl oder Bett. Dadurch liegt mehr Gewicht auf Brust, Schultern und Trizeps.",s:["Rucksack fest auf den Rücken schnallen, Hüftgurt zu.","Hände etwas breiter als schulterbreit auf den Boden, Füße auf den Stuhl.","Körper bildet eine gerade Linie, Bauch und Po anspannen.","Brust bis knapp über den Boden absenken, Ellenbogen etwa 45° vom Körper.","Kräftig hochdrücken, oben Arme fast strecken."],t:"Hängt die Hüfte durch, ist der Rucksack zu schwer."},
@@ -272,6 +276,7 @@ function ruckKg(name,w){
   const b=BAND.find(x=>w<=x[0]);let lo=Math.round(b[1]*r[0]),hi=Math.round(b[2]*r[0]);if(hi<=lo)hi=lo+1;if(lo<1)lo=1;
   return "Rucksack "+lo+"–"+hi+" kg";
 }
+INFO["Rumpfdrehbeugen"]={w:"Im Stehen abwechselnd mit einer Hand zum gegenüberliegenden Fuß drehen und beugen. Trainiert seitliche Bauchmuskeln, Rücken und Beweglichkeit und bringt den Puls hoch.",s:["Breitbeinig stehen, Füße deutlich weiter als schulterbreit, Knie leicht gebeugt.","Arme seitlich gestreckt auf Schulterhöhe.","Oberkörper drehen und nach vorn beugen, mit der rechten Hand den linken Fuß berühren. Der linke Arm zeigt nach oben.","Zurück in die Mitte, dann die linke Hand zum rechten Fuß.","Zügig, aber kontrolliert im Wechsel. Eine Berührung zählt als eine Wiederholung."],t:"Nicht ruckartig reißen. Kommst du nicht bis zum Fuß, reicht das Schienbein. Die Beweglichkeit kommt mit der Zeit."};
 INFO["Wiegen"]={w:"Dein Gewicht schwankt am Tag um bis zu 1–2 kg, je nach Essen, Trinken und Toilette. Damit die Werte vergleichbar sind, wiegst du dich immer gleich.",s:["Montag, Mittwoch, Freitag und Sonntag.","Morgens direkt nach dem Aufstehen und nach der Toilette.","Vor dem Essen und Trinken.","In Unterwäsche, immer auf derselben Waage am selben Platz.","Wert sofort in der App eintragen."],t:"Einzelne Werte sind egal. Die App rechnet den Wochenschnitt aus, und nur der zählt."};
 INFO["Krafttest"]={w:"Alle acht Wochen misst du, wie stark du geworden bist. Die Werte landen in der Statistik.",s:["Normal aufwärmen: 8–10 min rudern, dann 10 lockere Liegestütze.","Liegestütze-Test: mit dem angegebenen Rucksack-Gewicht so viele saubere Wiederholungen wie möglich. Brust bis eine Faust über dem Boden, oben Arme gestreckt, Körper gerade.","3 Minuten Pause.","Klimmzug-Test in der Schule: aus dem toten Hang, Ristgriff, Kinn über die Stange, kein Schwung. So viele wie möglich.","Danach Kraft A wie geplant, aber mit einem Satz weniger pro Übung."],t:"Gezählt wird nur, was sauber war. Halbe Wiederholungen zählen nicht."};
 INFO["5-km-Test"]={w:"Alle acht Wochen läufst du 5 km auf Zeit. Daraus berechnet die App deine Laufgeschwindigkeiten neu.",s:["Flache Strecke oder Bahn, am besten immer dieselbe.","15 min locker einlaufen, dabei 3 Steigerungen über 15–20 Sekunden.","5 km so schnell, wie du gleichmäßig durchhältst. Der erste Kilometer nicht schneller als der Rest.","10 min locker auslaufen.","Unten Distanz, Zeit und Puls eintragen und Art „5-km-Test“ lassen."],t:"Am Vortag ist Ruhe oder nur Krafttraining, also bist du ausgeruht."};
