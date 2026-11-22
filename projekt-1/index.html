@@ -143,6 +143,8 @@ ol,ul{margin:6px 0 0;padding-left:20px}li{margin:5px 0}
 .exdone{display:flex;justify-content:space-between;align-items:center;padding-top:10px;padding-bottom:10px}
 .check{margin-left:auto;flex:none;width:34px;height:34px;border-radius:50%;border:1.5px solid var(--hair);background:none;color:var(--ink);display:inline-flex;align-items:center;justify-content:center;padding:0}
 .check svg{opacity:.45}
+.check:disabled{opacity:.35}
+.prenote{margin-top:12px;padding:10px 14px;border:1px solid var(--line);border-radius:10px;font-size:14px;color:var(--mute)}
 .check:active{background:var(--c,var(--ink));border-color:var(--c,var(--ink));color:#fff}.check:active svg{opacity:1}
 .item .top .check{align-self:center}
 .opt{font-weight:500;color:var(--mute);font-size:13px;margin-left:4px}
@@ -427,7 +429,7 @@ function exItems(key,dk,dl,live){
       <div class="top"><span class="name">${esc(e[0])}${infoBtn(e[0])}</span></div>
       <div class="meta"><span class="setbars" aria-hidden="true">${bars}</span><b class="num">${n} Sätze × ${esc(reps)}</b><span>Pause ${e[3]}</span></div>
       ${k?`<span class="kg">${k}</span>`:""}</div>
-      ${live?`<button class="check" data-excheck="${i}" aria-label="${esc(e[0])} abhaken">${CHECK_SVG}</button>`:""}</div></div>`;
+      <button class="check" ${live?`data-excheck="${i}"`:"disabled"} aria-label="${esc(e[0])} abhaken">${CHECK_SVG}</button></div></div>`;
   });
   return open+fin;
 }
@@ -454,7 +456,7 @@ function vHeute(){
   const d=pre?parse(S.start):new Date(),dk=iso(d),p=dayPlan(d);
   S.items=S.items||{};const st=S.items[dk]||{};
   const titles=p.items.filter(i=>i.kind!=="swim"&&i.kind!=="test").map(titleOf).join(" + ");
-  let h=`<div class="hero"><div class="date">${pre?"Dein Start: ":""}${fmtDate(d)}</div><h1>${esc(titles)}</h1>
+  let h=`<div class="hero"><div class="date">${pre?"Dein Start: ":""}${fmtDate(d)}</div><h1>${esc(titles)}</h1>${pre?'<div class="prenote">Vorschau auf deinen ersten Tag. Abhaken kannst du ab dem Start.</div>':""}
     <div class="sub">Phase ${p.ph.name}${p.dl?", Entlastungswoche":""}</div>
     <div class="chips">${isTest(p.w)?'<span class="chip c t-ink" style="color:var(--on)">Testwoche</span>':""}${p.dl?'<span class="chip w">Halbe Sätze, weniger Laufen</span>':""}${p.items.some(i=>i.kind==="kraft")?`<span class="chip">${esc(p.ph.hint)}</span>`:""}</div></div>`;
   const mon=mondayOf(d);let lanes="";
@@ -470,7 +472,7 @@ function vHeute(){
   for(const it of p.items){
     const u=unitKey(it);
     if(u&&st[u]){doneList.push({u,it});continue}
-    const cb=(!pre&&u)?checkBtn(u,titleOf(it)):"";
+    const cb=u?(pre?`<button class="check" disabled aria-label="Ab dem Start abhakbar">${CHECK_SVG}</button>`:checkBtn(u,titleOf(it))):"";
     if(it.kind==="kraft"){
       const k=KRAFT[it.key];
       h+=`<div class="sec unit t-kraft" data-u="${u}"><h2><span class="dot"></span>${k.name}${cb}</h2><div class="lead">${k.tag}. Erst 8–10 min locker rudern. Jeder Satz endet 1–2 Wiederholungen vor dem Versagen. Ist eine Übung fertig, rechts abhaken. Oben rechts hakst du die ganze Einheit auf einmal ab.</div><div class="group">${exItems(it.key,dk,p.dl,!pre)}</div></div>`;
